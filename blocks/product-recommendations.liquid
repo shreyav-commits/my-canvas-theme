@@ -1,0 +1,112 @@
+{% doc %}
+  Product recommendations. Renders a lazy-loaded grid of related or complementary products
+  for the current product, sourced from Shopify's Product Recommendations API. Capture
+  the caller-owned `card`, `image`, `text`, and `price` loop as `recommendations_content`.
+  Compose an optional heading in the block body above the grid.
+
+  Place on a product template (needs `product` in scope).
+
+  @param {string} recommendations_content - Caller-captured recommendation card grid. @required
+  @param {number} [limit] - Max products to show. Falls back to the `max_products` setting, then 4.
+  @param {string} [intent] - 'related' or 'complementary'. Falls back to the `recommendation_type` setting, then 'related'.
+  @param {string} [columns] - Grid column utilities. Default: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'.
+  @param {string} [class] - Additional CSS classes appended to the root element.
+  @param {string} [attributes] - Additional HTML attributes passed through to the root element.
+
+  @category product
+  @renders s-product-recommendations
+
+  @example Template-owned card grid
+  {% assign rec_columns = 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' %}
+  {% capture rec_grid %}
+    <div class="grid {{ rec_columns }} gap-4">
+      {% for rec_product in recommendations.products %}
+        {% assign rec_variant = rec_product.selected_or_first_available_variant %}
+        <s-view-event class="block" view-event-trigger="intersect" view-event-payload="{{ rec_product | standard_event_data: 'view' | escape }}">
+          {% block 'card', block.name: 't:blocks.product_card', url: rec_product.url, aria_label: rec_product.title, border_radius: 'rounded-card' %}
+            <a href="{{ rec_product.url | escape }}" class="relative block overflow-hidden rounded-[inherit]" aria-label="{{ rec_product.title | escape }}">
+              {% block 'image', fallback_image: rec_product.featured_image, aspect_ratio: 'aspect-square', sizes: '(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw', alt: rec_product.title, attributes: 'loading="lazy"', seed: forloop.index %}{% endblock %}
+            </a>
+            <div class="flex flex-col gap-0.5">
+              {% block 'text', variant: 'type-body-sm', tag: 'h3', class: 'font-medium text-on-surface line-clamp-2' %}{{ rec_product.title | escape }}{% endblock %}
+              {% block 'price', price: rec_variant.price, compare_at_price: rec_variant.compare_at_price, price_min: rec_product.price_min, price_max: rec_product.price_max, class: 'text-sm font-medium self-start group-[.text-center]/card:self-center group-[.text-end]/card:self-end' %}{% endblock %}
+            </div>
+          {% endblock %}
+        </s-view-event>
+      {% endfor %}
+    </div>
+  {% endcapture %}
+  {% block 'product-recommendations', recommendations_content: rec_grid, columns: rec_columns %}{% endblock %}
+{% enddoc %}
+
+{%- liquid
+  assign rec_limit = limit | default: block.settings.max_products | default: 4
+  assign rec_intent = intent | default: block.settings.recommendation_type | default: 'related'
+  assign grid_columns = columns | default: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+  assign rec_id = 'product-recommendations-' | append: block.id
+
+  # The partial name is shared with s-product-recommendations.js for fetching and replacing the grid.
+  assign partial_name = 'product-recommendations'
+  assign rec_url = routes.product_recommendations_url | append: '?intent=' | append: rec_intent | append: '&limit=' | append: rec_limit
+-%}
+
+<s-product-recommendations
+  id="{{ rec_id }}"
+  class="block{% if class %} {{ class }}{% endif %}"
+  data-url="{{ rec_url }}"
+  data-product-id="{{ product.id }}"
+  data-intent="{{ rec_intent }}"
+  data-partial="{{ partial_name }}"
+  data-performed="{{ recommendations.performed }}"
+  {%- if recommendations.performed and recommendations.products_count == 0 %} hidden{% endif %}
+  {%- if attributes != blank %} {{ attributes }}{% endif %}
+>
+  {%- if content != blank -%}
+    {{ content }}
+  {%- endif -%}
+
+  {%- comment -%} partials.apply() swaps this named region wholesale. Keep the name in sync with data-partial. {%- endcomment -%}
+  {%- partial 'product-recommendations' -%}
+    {%- if recommendations.performed -%}
+      {%- if recommendations.products_count > 0 -%}
+        {{ recommendations_content }}
+      {%- endif -%}
+    {%- else -%}
+      {%- comment -%} Skeletons are only for pending data, not an empty completed response. {%- endcomment -%}
+      <div class="grid {{ grid_columns }} gap-4" aria-hidden="true">
+        {%- for i in (1..rec_limit) -%}
+          <div class="aspect-square rounded-card bg-surface-secondary motion-safe:animate-pulse"></div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  {%- endpartial -%}
+</s-product-recommendations>
+
+<script type="module" src="{{ 's-product-recommendations.js' | asset_url }}"></script>
+
+{% schema %}
+  {
+    "name": "t:shopify_library.blocks.product_recommendations",
+    "settings": [
+      {
+        "type": "select",
+        "id": "recommendation_type",
+        "label": "t:shopify_library.blocks.product_recommendations_settings.type",
+        "default": "related",
+        "options": [
+          { "value": "related", "label": "t:shopify_library.blocks.product_recommendations_settings.type_related" },
+          { "value": "complementary", "label": "t:shopify_library.blocks.product_recommendations_settings.type_complementary" }
+        ]
+      },
+      {
+        "type": "range",
+        "id": "max_products",
+        "label": "t:shopify_library.blocks.product_recommendations_settings.max_products",
+        "min": 2,
+        "max": 10,
+        "step": 1,
+        "default": 4
+      }
+    ]
+  }
+{% endschema %}

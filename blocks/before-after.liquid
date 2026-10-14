@@ -1,0 +1,97 @@
+{% doc %}
+  Draggable before/after image comparison. The after image is the base layer;
+  the before image is clipped to the slider position from the reading-start
+  edge. A native range input (full-bleed, visually hidden) drives the position,
+  so keyboard, touch and pointer all work without custom gesture code.
+  Caller body content (for example label text blocks) renders above the images
+  via `content`; position labels with absolute utilities at the call site.
+  The template must load `s-before-after.js`.
+
+  @param {string} [class] - Tailwind utilities for the root element (sizing, aspect ratio).
+  @param {string} [attributes] - Additional HTML attributes on the root element.
+  @param {string} [sizes] - Responsive sizes attribute for both images. Default: '100vw'.
+  @param {string} [slider_label] - Accessible name for the range input.
+
+  @category media
+  @renders s-before-after
+
+  @example
+  {% block 'before-after', class: 'aspect-square', before_image: images['before.jpg'], after_image: images['after.jpg'] %}
+    {% block 'text', class: 'absolute top-4 start-4' %}Before{% endblock %}
+  {% endblock %}
+{% enddoc %}
+
+{%- liquid
+  assign position = position | default: 50
+  assign sizes = sizes | default: '100vw'
+  assign slider_label = slider_label | default: ''
+  assign root_class = 'group/compare relative block overflow-hidden select-none bg-surface-secondary'
+  if class != blank
+    assign root_class = root_class | append: ' ' | append: class
+  endif
+-%}
+
+<s-before-after class="{{ root_class }}" style="--position: {{ position }}%;"{% if attributes != blank %} {{ attributes }}{% endif %}>
+  {%- if after_image -%}
+    {{ after_image | image_url: width: 1500 | image_tag: sizes: sizes, widths: '550,750,1100,1500', loading: 'lazy', class: 'absolute inset-0 size-full object-cover', alt: after_image.alt }}
+  {%- else -%}
+    {% render 'placeholder-texture', kind: 'image', seed: 5, class: 'absolute inset-0 size-full aspect-auto' %}
+  {%- endif -%}
+
+  {%- comment -%} Clip from the reading-start edge so the before side follows text direction. {%- endcomment -%}
+  <div class="absolute inset-0 [clip-path:inset(0_calc(100%-var(--position))_0_0)] rtl:[clip-path:inset(0_0_0_calc(100%-var(--position)))]">
+    {%- if before_image -%}
+      {{ before_image | image_url: width: 1500 | image_tag: sizes: sizes, widths: '550,750,1100,1500', loading: 'lazy', class: 'absolute inset-0 size-full object-cover', alt: before_image.alt }}
+    {%- else -%}
+      {% render 'placeholder-texture', kind: 'image', seed: 6, class: 'absolute inset-0 size-full aspect-auto' %}
+    {%- endif -%}
+  </div>
+
+  {{ content }}
+
+  {%- comment -%} The native range is the source of truth for position; it sits on top so the whole image is draggable. {%- endcomment -%}
+  <input
+    type="range"
+    min="0"
+    max="100"
+    step="1"
+    value="{{ position }}"
+    aria-label="{{ slider_label | escape }}"
+    class="peer absolute inset-0 z-20 size-full cursor-ew-resize opacity-0 m-0"
+  >
+
+  <div class="pointer-events-none absolute inset-y-0 z-10 start-(--position) w-px bg-interactive [&>span]:outline-accent peer-focus-visible:[&>span]:outline-2 peer-focus-visible:[&>span]:outline-offset-2" aria-hidden="true">
+    <span class="absolute top-1/2 start-0 -translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-1 size-12 rounded-full bg-interactive text-interactive-text shadow motion-safe:transition-transform group-active/compare:scale-[0.93]">
+      <span class="inline-flex size-4 rtl:-scale-x-100">{{- 'icon-chevron-left.svg' | inline_asset_content -}}</span>
+      <span class="inline-flex size-4 rtl:-scale-x-100">{{- 'icon-chevron-right.svg' | inline_asset_content -}}</span>
+    </span>
+  </div>
+</s-before-after>
+
+{% schema %}
+  {
+    "name": "t:blocks.before_after",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "before_image",
+        "label": "t:blocks.before_after_settings.before_image"
+      },
+      {
+        "type": "image_picker",
+        "id": "after_image",
+        "label": "t:blocks.before_after_settings.after_image"
+      },
+      {
+        "type": "range",
+        "id": "position",
+        "label": "t:blocks.before_after_settings.position",
+        "min": 10,
+        "max": 90,
+        "step": 5,
+        "unit": "%",
+        "default": 50
+      }
+    ]
+  }
+{% endschema %}

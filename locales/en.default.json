@@ -1,0 +1,400 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "404": {
+    "title": "404",
+    "title_accessible": "404 — Page not found",
+    "not_found": "Page not found.",
+    "back_to_shopping": "Explore the collection",
+    "suggestions_heading": "A different way forward.",
+    "recovery_body": "This page couldn’t be found. There’s still plenty to discover."
+  },
+  "general": {
+    "skip_to_content": "Skip to content",
+    "play_video": "Play video",
+    "video_player": "Video player",
+    "captions": "Captions",
+    "clear": "Clear",
+    "back": "Back",
+    "close": "Close",
+    "dismiss": "Dismiss",
+    "drawer": "Drawer",
+    "placeholder_image": "Placeholder image",
+    "account": "Account",
+    "search": "Search",
+    "pagination": {
+      "label": "Pagination",
+      "previous_page": "Previous page",
+      "next_page": "Next page",
+      "page": "Page {{ number }}",
+      "current_page": "Page {{ number }}, current page",
+      "load_more": "Load more",
+      "loading": "Loading",
+      "loaded": "More products loaded"
+    },
+    "meta": {
+      "tagged": "tagged \"{{ tags }}\"",
+      "page": "Page {{ number }}"
+    }
+  },
+  "accessibility": {
+    "comparison_slider": "Drag to compare images",
+    "results_updated": "Results updated",
+    "variant_updated": "Selection updated",
+    "update_error": "An error occurred. Please try again."
+  },
+  "blog": {
+    "articles_heading": "Articles",
+    "article_metadata_html": "<time datetime=\"{{ datetime }}\">{{ date }}</time> · {{ author }}",
+    "article_metadata_no_author_html": "<time datetime=\"{{ datetime }}\">{{ date }}</time>",
+    "comment_form_body": "Comment",
+    "comment_form_email": "Email",
+    "comment_form_name": "Name",
+    "comment_form_submit": "Post",
+    "comment_form_title": "Add a comment",
+    "comments_count": {
+      "one": "1 comment",
+      "other": "{{ count }} comments"
+    },
+    "no_articles": "No articles yet."
+  },
+  "cart": {
+    "upsell_heading": "Complete the wall",
+    "free_shipping": {
+      "progress_html": "You're <strong>{{ amount }}</strong> away from <strong>free shipping</strong>!",
+      "success_html": "Woohoo! You've unlocked <strong>free shipping</strong> 🎉",
+      "progress_label": "Progress toward free shipping"
+    },
+    "protection": {
+      "title": "Shipping protection",
+      "description": "Cover your order against loss, theft and damage in transit.",
+      "toggle_label": "Add shipping protection for {{ price }}"
+    },
+    "checkout": "Checkout",
+    "title": "Cart",
+    "remove": "Remove: {{ title }}",
+    "empty": "Your cart is empty.",
+    "empty_description": "Looks like you haven't added anything to your cart yet.",
+    "icon_label": {
+      "one": "Cart (1 item)",
+      "other": "Cart ({{ count }} items)"
+    },
+    "item_count": {
+      "one": "1 item in cart",
+      "other": "{{ count }} items in cart"
+    },
+    "item_removed": "Item removed from cart",
+    "updated": "Cart updated",
+    "note_label": "Order notes",
+    "note_placeholder": "Add special instructions for your order",
+    "taxes_and_shipping_at_checkout": "Taxes and shipping calculated at checkout",
+    "discount_list": "Applied discounts",
+    "discount_savings": "(-{{ amount }})",
+    "discount_code": "Discount code",
+    "discount_title": "Discount: {{ title }}",
+    "update_error": "Could not update cart. Please try again.",
+    "refresh_error": "Cart updated, but the display may be out of date. Refresh the page to see the latest cart.",
+    "continue_shopping": "Continue shopping",
+    "checkout_description": "Proceeds to secure checkout",
+    "discount_placeholder": "Enter code",
+    "discount_apply": "Apply",
+    "note_accordion_label": "Special instructions",
+    "total_label": "Estimated total"
+  },
+  "contact": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "message": "Message",
+    "submit": "Send message",
+    "success": "Thank you for reaching out. We'll be in touch soon.",
+    "success_heading": "Message received.",
+    "heading": "Let's talk about your walls.",
+    "intro": "Questions about a print, framing advice or a commission? Send us a note and a real person will reply.",
+    "email_us": "Email",
+    "response_label": "Response time",
+    "response_value": "Within one business day",
+    "studio_label": "Studio",
+    "topic_label": "What is it about?",
+    "topic_general": "General question",
+    "topic_order": "An order",
+    "topic_framing": "Framing advice",
+    "topic_commission": "Commission",
+    "form_heading": "Send a message"
+  },
+  "collections": {
+    "all_collections": "All collections",
+    "view_label": "View",
+    "view_grid": "Grid view",
+    "view_list": "List view",
+    "per_page_label": "Show",
+    "per_page_option": "{{ count }} per page",
+    "per_page_updated": "Showing {{ count }} products per page",
+    "browse_heading": "Browse collections",
+    "products_heading": "Products",
+    "placeholder_title": "Collection title",
+    "no_collections": "No collections found.",
+    "no_products": "No products found.",
+    "products_count": {
+      "one": "1 product",
+      "other": "{{ count }} products"
+    },
+    "filter": "Filter",
+    "filters": "Filters",
+    "active_filters": "Active filters",
+    "clear_all": "Clear all",
+    "remove_filter": "Remove {{ filter }}",
+    "show_results": "Show results",
+    "value_unavailable": "Unavailable",
+    "price_min": "Min price",
+    "price_max": "Max price",
+    "price_to": "to",
+    "sort_by": "Sort by",
+    "filtering": {
+      "show_more": "Show more"
+    },
+    "view_all": "View all"
+  },
+  "header": {
+    "menu": "Menu",
+    "mobile_navigation": "Mobile navigation",
+    "navigation": "Main navigation",
+    "view_all": "View all {{ title }}",
+    "show_submenu": "Show submenu for {{ title }}"
+  },
+  "footer": {
+    "quick_links": "Quick links",
+    "policies": "Policies"
+  },
+  "gift_card": {
+    "add_to_apple_wallet": "Add to Apple Wallet",
+    "card": "Gift card",
+    "expired": "This gift card has expired",
+    "expires_on": "Expires on {{ expires_on }}",
+    "use_at_checkout": "Use this gift card at checkout",
+    "a_gift_for_you": "A gift for you",
+    "available": "{{ amount }} available",
+    "a_little_something": "A little something for you",
+    "card_label": "{{ shop }} gift card",
+    "copy_code": "Copy code",
+    "copied": "Code copied",
+    "copy_error": "Couldn’t copy automatically. Copy the code manually.",
+    "disabled": "This gift card is no longer valid",
+    "start_shopping": "Start shopping"
+  },
+  "page": {
+    "content_heading": "Page content"
+  },
+  "password": {
+    "title": "This shop is private",
+    "eyebrow": "Opening soon",
+    "launch_description": "Get an early look at what's next.",
+    "enter": "Enter",
+    "enter_with_password": "Enter with password",
+    "enter_store": "Enter store",
+    "show": "Show",
+    "hide": "Hide",
+    "error": "Incorrect password. Please try again.",
+    "field_label": "Password",
+    "placeholder": "Enter password",
+    "get_updates": "Get opening updates",
+    "updates_description": "Be the first to know when we open.",
+    "updates_submit": "Notify me",
+    "updates_success": "Thanks for subscribing."
+  },
+  "product": {
+    "details": "Product details",
+    "placeholder_title": "Product title",
+    "quantity": "Quantity",
+    "quantity_decrease": "Decrease quantity: {{ title }}",
+    "quantity_increase": "Increase quantity: {{ title }}",
+    "quantity_input": "Quantity for {{ title }}",
+    "add_to_cart": "Add to cart",
+    "added_to_cart": "Added to cart",
+    "upsell_heading": "Pairs well with",
+    "sale_badge": "-{{ percent }}%",
+    "save_amount": "You save {{ amount }}",
+    "only_left": "Only {{ count }} left. Selling fast!",
+    "in_stock": "In stock, ready to ship",
+    "free_shipping_over": "Free shipping on orders over {{ amount }}",
+    "trust_secure": "Secure checkout",
+    "trust_returns": "Easy returns",
+    "trust_delivery": "Fast delivery",
+    "you_may_also_like": "You may also like",
+    "recently_viewed": "Recently viewed",
+    "upsell_add": "Add",
+    "upsell_add_label": "Add {{ title }} to cart",
+    "sold_out": "Sold out",
+    "description": "Description",
+    "view_image": "View image: {{ title }}",
+    "image_zoom": "Expanded product image"
+  },
+  "products": {
+    "price": {
+      "price": "Price",
+      "price_range_html": "{{ min }} – {{ max }}",
+      "price_range_label": "Price range",
+      "regular_price": "Regular price",
+      "sale_price": "Sale price",
+      "savings": "Save {{ amount }}"
+    },
+    "quantity": {
+      "decrease": "Decrease quantity",
+      "increase": "Increase quantity",
+      "input_label": "Quantity"
+    }
+  },
+  "filters": {
+    "active_count": {
+      "one": "1 active filter",
+      "other": "{{ count }} active filters"
+    }
+  },
+  "forms": {
+    "required": "required",
+    "form_errors_title": "Please fix the following errors:"
+  },
+  "search": {
+    "title": "Search",
+    "label": "Search",
+    "placeholder": "Search",
+    "products_heading": "Products",
+    "results_heading": "Search results",
+    "view_all_results": "View all results",
+    "results_count_announcement": {
+      "one": "1 result available",
+      "other": "{{ count }} results available"
+    },
+    "no_results_announcement": "No results found for {{ terms }}",
+    "results_for": "{{ count }} results found for {{ terms }}",
+    "no_results": "No results found for {{ terms }}",
+    "live_results_announcement": {
+      "one": "{{ count }} result found for {{ terms }}",
+      "other": "{{ count }} results found for {{ terms }}"
+    },
+    "live_no_results_announcement": "No results found for {{ terms }}"
+  },
+  "localization": {
+    "form_label": "Region and language",
+    "language": "Language",
+    "country_region_currency": "Country/region and currency",
+    "update_language": "Update"
+  },
+  "home": {
+    "marquee": {
+      "item_one": "Made to order",
+      "item_two": "Museum-grade paper",
+      "item_three": "Small signed editions",
+      "item_four": "Framing advice, free"
+    },
+    "hero": {
+      "title": "New arrivals",
+      "subtitle": "Explore the collection",
+      "eyebrow": "New editions just landed",
+      "heading": "Quiet walls, lasting impressions",
+      "body": "Fine art prints and framed works, made to order in small editions.",
+      "cta": "View the collection"
+    },
+    "edit": {
+      "heading": "Art chosen the way a curator would choose it",
+      "body": "Every piece in the collection is selected for how it lives on a wall: the light it holds, the stillness it brings to a room, the conversation it starts. Nothing is mass-produced. Each print is made only once you order it.",
+      "link": "Browse all works",
+      "caption_one": "Desert study, black frame",
+      "caption_two": "Low tide, graphite frame"
+    },
+    "featured": {
+      "heading": "On the wall now"
+    },
+    "compare": {
+      "heading": "The difference a mat makes",
+      "body": "Drag across the piece to see the same work hung bare and finished with a gallery mat. A mat gives the artwork room to breathe and draws the eye inward.",
+      "before_label": "Without mat",
+      "after_label": "With mat",
+      "cta": "Choose your finish"
+    },
+    "craft": {
+      "heading": "Made with museum-grade care",
+      "paper_title": "Archival paper",
+      "paper_body": "Thick matte stock with a smooth, glare-free finish that holds deep blacks and soft tones.",
+      "print_title": "Twelve-color giclée",
+      "print_body": "Fine art printing renders colour and grayscale with depth far beyond standard inkjet.",
+      "edition_title": "Signed editions",
+      "edition_body": "Limited runs of 1 to 100, each completed by hand and shipped with a certificate of authenticity.",
+      "cta": "Find your piece"
+    }
+  },
+  "footer_signoff": {
+    "heading": "Bring the gallery home.",
+    "body": "Fine art prints and framed works, made to order.",
+    "newsletter_heading": "Join the private view",
+    "newsletter_body": "New editions, studio notes and early access to limited runs. Quietly, once a month.",
+    "column_shop": "Shop",
+    "column_help": "Help",
+    "column_info": "Information"
+  },
+  "newsletter": {
+    "email_label": "Email address",
+    "placeholder": "Your email address",
+    "submit": "Subscribe",
+    "success": "Thank you. You're on the list."
+  },
+  "shopify_library": {
+    "carousel": {
+      "label": "Carousel",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "pagefly": {
+    "products": {
+      "product": {
+        "regular_price": "Regular price",
+        "sold_out": "Sold out",
+        "unavailable": "Unavailable",
+        "on_sale": "Sale",
+        "quantity": "Quantity",
+        "add_to_cart": "Add to cart",
+        "back_to_collection": "Back to {{ title }}",
+        "view_details": "View details"
+      }
+    },
+    "article": {
+      "tags": "Tags:",
+      "all_topics": "All topics",
+      "by_author": "by {{ author }}",
+      "posted_in": "Posted in",
+      "read_more": "Read more",
+      "back_to_blog": "Back to {{ title }}"
+    },
+    "comments": {
+      "title": "Leave a comment",
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "post": "Post comment",
+      "moderated": "Please note, comments must be approved before they are published",
+      "success_moderated": "Your comment was posted successfully. We will publish it in a little while, as our blog is moderated.",
+      "success": "Your comment was posted successfully! Thank you!",
+      "comments_with_count": {
+        "one": "{{ count }} comment",
+        "other": "{{ count }} comments"
+      }
+    },
+    "password_page": {
+      "login_form_message": "Enter store using password:",
+      "login_form_password_label": "Password",
+      "login_form_password_placeholder": "Your password",
+      "login_form_submit": "Enter",
+      "signup_form_email_label": "Email",
+      "signup_form_success": "We will send you an email right before we open!",
+      "password_link": "Enter using password"
+    }
+  }
+}

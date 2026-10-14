@@ -1,0 +1,127 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "current": {
+    "free_shipping_threshold": 200,
+    "shipping_protection_product": "shipping-protection",
+    "color_palette": {
+      "surface": "#F7F1E7",
+      "on_surface": "#1B1A17",
+      "surface_2": "#F4D8C0",
+      "accent": "#B83A1B",
+      "interactive": "#1F3A93"
+    },
+    "type_primary_font": "work_sans_n4",
+    "type_heading_font": "cormorant_n5",
+    "type_scale_paragraph_size": "sm",
+    "type_scale_heading_size": "lg",
+    "border_radius_buttons": "sharp",
+    "border_radius_cards": "sharp",
+    "border_radius_forms": "sharp"
+  },
+  "presets": {
+    "Terracotta and Cobalt": {
+      "color_palette": {
+        "surface": "#F7F1E7",
+        "on_surface": "#1B1A17",
+        "surface_2": "#F4D8C0",
+        "accent": "#B83A1B",
+        "interactive": "#1F3A93"
+      },
+      "type_primary_font": "work_sans_n4",
+      "type_heading_font": "cormorant_n5",
+      "type_scale_paragraph_size": "sm",
+      "type_scale_heading_size": "lg",
+      "border_radius_buttons": "sharp",
+      "border_radius_cards": "sharp",
+      "border_radius_forms": "sharp"
+    },
+    "Gallery Ink": {
+      "color_palette": {
+        "surface": "#F4F4F2",
+        "on_surface": "#111111",
+        "surface_2": "#E6E6E2",
+        "accent": "#5C5C58",
+        "interactive": "#111111"
+      },
+      "type_primary_font": "work_sans_n4",
+      "type_heading_font": "cormorant_n5",
+      "type_scale_paragraph_size": "sm",
+      "type_scale_heading_size": "lg",
+      "border_radius_buttons": "sharp",
+      "border_radius_cards": "sharp",
+      "border_radius_forms": "sharp"
+    },
+    "Bone and Charcoal": {
+      "color_palette": {
+        "surface": "#F3EFE8",
+        "on_surface": "#1E1C1A",
+        "surface_2": "#E6DFD3",
+        "accent": "#6E5F4C",
+        "interactive": "#2B2724"
+      },
+      "type_primary_font": "work_sans_n4",
+      "type_heading_font": "cormorant_n5",
+      "type_scale_paragraph_size": "sm",
+      "type_scale_heading_size": "lg",
+      "border_radius_buttons": "sharp",
+      "border_radius_cards": "sharp",
+      "border_radius_forms": "sharp"
+    },
+    "Gallery Night": {
+      "color_palette": {
+        "surface": "#121212",
+        "on_surface": "#F2F2EF",
+        "surface_2": "#1F1F1D",
+        "accent": "#B5B5AE",
+        "interactive": "#F2F2EF"
+      },
+      "type_primary_font": "work_sans_n4",
+      "type_heading_font": "cormorant_n5",
+      "type_scale_paragraph_size": "sm",
+      "type_scale_heading_size": "lg",
+      "border_radius_buttons": "sharp",
+      "border_radius_cards": "sharp",
+      "border_radius_forms": "sharp"
+    },
+    "Slate Studio": {
+      "color_palette": {
+        "surface": "#EEF0F1",
+        "on_surface": "#15191C",
+        "surface_2": "#DFE3E6",
+        "accent": "#4A5762",
+        "interactive": "#1C2730"
+      },
+      "type_primary_font": "work_sans_n4",
+      "type_heading_font": "cormorant_n5",
+      "type_scale_paragraph_size": "sm",
+      "type_scale_heading_size": "lg",
+      "border_radius_buttons": "sharp",
+      "border_radius_cards": "sharp",
+      "border_radius_forms": "sharp"
+    },
+    "Sage Atelier": {
+      "color_palette": {
+        "surface": "#EFF1EC",
+        "on_surface": "#1A1D19",
+        "surface_2": "#DFE4DA",
+        "accent": "#55634E",
+        "interactive": "#263024"
+      },
+      "type_primary_font": "work_sans_n4",
+      "type_heading_font": "cormorant_n5",
+      "type_scale_paragraph_size": "sm",
+      "type_scale_heading_size": "lg",
+      "border_radius_buttons": "sharp",
+      "border_radius_cards": "sharp",
+      "border_radius_forms": "sharp"
+    }
+  }
+}
