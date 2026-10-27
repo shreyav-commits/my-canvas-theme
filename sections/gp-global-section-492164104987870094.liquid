@@ -1,0 +1,115 @@
+
+    {% render 'gp-head', isThemeSection: true %}
+    
+    <style {% if section.settings.section_preload == "false" %} class="gps-link gps-style" type="text/disabled-css" {% endif %}>.gps-492164104987870094.gps.gpsil [style*="--bg:"]{background:var(--bg)}.gps-492164104987870094.gps.gpsil [style*="--bga:"]{background-attachment:var(--bga)}.gps-492164104987870094.gps.gpsil [style*="--bgc:"]{background-color:var(--bgc)}.gps-492164104987870094.gps.gpsil [style*="--bgi:"]{background-image:var(--bgi)}.gps-492164104987870094.gps.gpsil [style*="--bgp:"]{background-position:var(--bgp)}.gps-492164104987870094.gps.gpsil [style*="--bgr:"]{background-repeat:var(--bgr)}.gps-492164104987870094.gps.gpsil [style*="--bgs:"]{background-size:var(--bgs)}.gps-492164104987870094.gps.gpsil [style*="--b:"]{border:var(--b)}.gps-492164104987870094.gps.gpsil [style*="--bc:"]{border-color:var(--bc)}.gps-492164104987870094.gps.gpsil [style*="--radius:"]{border-radius:var(--radius)}.gps-492164104987870094.gps.gpsil [style*="--bw:"]{border-width:var(--bw)}.gps-492164104987870094.gps.gpsil [style*="--shadow:"]{box-shadow:var(--shadow)}.gps-492164104987870094.gps.gpsil [style*="--c:"]{color:var(--c)}.gps-492164104987870094.gps.gpsil [style*="--cg:"]{-moz-column-gap:var(--cg);column-gap:var(--cg)}.gps-492164104987870094.gps.gpsil [style*="--gtc:"]{grid-template-columns:var(--gtc)}.gps-492164104987870094.gps.gpsil [style*="--jc:"]{justify-content:var(--jc)}.gps-492164104987870094.gps.gpsil [style*="--op:"]{opacity:var(--op)}.gps-492164104987870094.gps.gpsil [style*="--o:"]{order:var(--o)}.gps-492164104987870094.gps.gpsil [style*="--pc:"]{place-content:var(--pc)}.gps-492164104987870094.gps.gpsil [style*="--p:"]{padding:var(--p)}.gps-492164104987870094.gps.gpsil [style*="--pb:"]{padding-bottom:var(--pb)}.gps-492164104987870094.gps.gpsil [style*="--pt:"]{padding-top:var(--pt)}.gps-492164104987870094.gps.gpsil [style*="--ta:"]{text-align:var(--ta)}.gps-492164104987870094.gps.gpsil [style*="--t:"]{transform:var(--t)}.gps-492164104987870094.gps.gpsil [style*="--w:"]{width:var(--w)}@media only screen and (max-width:1024px){.gps-492164104987870094.gps.gpsil [style*="--w-tablet:"]{width:var(--w-tablet)}}@media only screen and (max-width:767px){.gps-492164104987870094.gps.gpsil [style*="--w-mobile:"]{width:var(--w-mobile)}}.gps-492164104987870094 .gp-relative{position:relative}.gps-492164104987870094 .gp-mx-auto{margin-left:auto;margin-right:auto}.gps-492164104987870094 .gp-mb-0{margin-bottom:0}.gps-492164104987870094 .gp-flex{display:flex}.gps-492164104987870094 .gp-grid{display:grid}.gps-492164104987870094 .\!gp-hidden{display:none!important}.gps-492164104987870094 .gp-hidden{display:none}.gps-492164104987870094 .gp-max-w-full{max-width:100%}.gps-492164104987870094 .gp-grid-rows-\[1fr\]{grid-template-rows:1fr}.gps-492164104987870094 .gp-flex-col{flex-direction:column}.gps-492164104987870094 .gp-transition-colors{transition-duration:.15s;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1)}.gps-492164104987870094 .gp-duration-200{transition-duration:.2s}.gps-492164104987870094 .gp-ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}@media (max-width:1024px){.gps-492164104987870094 .tablet\:\!gp-hidden{display:none!important}.gps-492164104987870094 .tablet\:gp-hidden{display:none}}@media (max-width:767px){.gps-492164104987870094 .mobile\:\!gp-hidden{display:none!important}.gps-492164104987870094 .mobile\:gp-hidden{display:none}}.gps-492164104987870094 .\[\&_\*\]\:gp-max-w-full *{max-width:100%}</style>
+    
+  
+    
+    
+    
+
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+
+    
+        <section
+          class="gp-mx-auto gp-max-w-full [&_*]:gp-max-w-full {% if section.settings.section_preload == "false" %}gps-lazy {% endif %}"
+          style="--w:calc(var(--g-ct-w, 1200px) + 2 * var(--g-ct-p, 15px));--w-tablet:calc(var(--g-ct-w, 100%) + 2 * var(--g-ct-p, 15px));--w-mobile:calc(var(--g-ct-w, 100%) + 2 * var(--g-ct-p, 15px))"
+        >
+          
+    <gp-row
+      data-id="giCEkWy-DR" id="giCEkWy-DR" data-same-height-subgrid-container
+      class="giCEkWy-DR gp-relative gp-mx-auto gp-mb-0 gp-grid gp-max-w-full gp-transition-colors gp-duration-200 gp-ease-in-out [&_*]:gp-max-w-full gp-grid-rows-[1fr]"
+      style="--pt:var(--g-s-2xl);--pb:var(--g-s-2xl);--d:grid;--d-tablet:grid;--d-mobile:grid;--b:solid;--bc:#121212;--bw:0px;--radius:var(--g-radius-none);--shadow:none;--op:100%;--cg:32px;--gtc:minmax(0, 12fr);--bgc:transparent;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll;--pc:start"
+    >
+      <script gp-data type="application/json">{"background":{"desktop":{"type":"color","color":"transparent","image":{"src":"","width":0,"height":0},"size":"cover","position":{"x":50,"y":50},"repeat":"no-repeat","attachment":"scroll"}},"uid":"giCEkWy-DR"}</script>
+      
+
+      <div
+      data-same-height-display-contents
+      style="--jc:start"
+      class="gWdtwGMlvl gp-relative gp-flex gp-flex-col"
+    >
+      
+  
+    <div
+      data-id="gdN-EIJaE7"
+      style="--d:block;--d-tablet:block;--d-mobile:block;--b:solid;--bc:#121212;--bw:0px;--radius:var(--g-radius-none);--shadow:none;--op:100%;--ta:left;--bgc:transparent;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll"
+      data-keep-class="true"
+      class="gdN-EIJaE7 gp-custom-code">
+      <div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/2.0.5/wavesurfer.min.js"></script>
+
+<div class="container"><img height="40px" width="40px" class="playPause7" src="https://cdn.shopify.com/s/files/1/0541/0101/6759/files/white_play_icon_ee8f59d9-e1ce-49b4-ac6b-829dad006a0e.png?v=1684068399" class="control_button"><br><div id="wavesurfer-container6" class="wavesurfer-container7" style="width: 100%"><wave style="display: block; position: relative; user-select: none; height: 40px; overflow: hidden;"><wave style="position: absolute; z-index: 3; left: 0px; top: 0px; bottom: 0px; overflow: hidden; width: 0px; display: block; box-sizing: border-box; border-right: 0px solid rgb(51, 51, 51); pointer-events: none;"><canvas width="145" height="40" style="position: absolute; left: 0px; top: 0px; bottom: 0px; height: 100%; width: 145px;"></canvas></wave><canvas width="145" height="40" style="position: absolute; z-index: 2; left: 0px; top: 0px; bottom: 0px; height: 100%; pointer-events: none; width: 145px;"></canvas></wave><audio preload="auto" src="https://cdn.shopify.com/s/files/1/0541/0101/6759/files/Female_Vocal_Loop.mp3?v=1694552019" style="width: 100%;"></audio></div></div>
+
+<div class="container"><img height="40px" width="40px" class="playPause7" src="https://cdn.shopify.com/s/files/1/0541/0101/6759/files/white_play_icon_ee8f59d9-e1ce-49b4-ac6b-829dad006a0e.png?v=1684068399" class="control_button"><br><div id="wavesurfer-container7" class="wavesurfer-container7" style="width: 100%"><wave style="display: block; position: relative; user-select: none; height: 40px; overflow: hidden;"><wave style="position: absolute; z-index: 3; left: 0px; top: 0px; bottom: 0px; overflow: hidden; width: 0px; display: block; box-sizing: border-box; border-right: 0px solid rgb(51, 51, 51); pointer-events: none;"><canvas width="145" height="40" style="position: absolute; left: 0px; top: 0px; bottom: 0px; height: 100%; width: 145px;"></canvas></wave><canvas width="145" height="40" style="position: absolute; z-index: 2; left: 0px; top: 0px; bottom: 0px; height: 100%; pointer-events: none; width: 145px;"></canvas></wave><audio preload="auto" src="https://cdn.shopify.com/s/files/1/0541/0101/6759/files/U_Wanna.mp3?v=1694551862" style="width: 100%;"></audio></div></div>
+    </div>
+    </div>
+  
+      <script id="custom-js-gdN-EIJaE7">
+        try {
+          let players = [];
+let buttons = document.querySelectorAll(".playPause7");
+buttons.forEach(button => {
+    
+    wavesurferContainer = '#' + button.parentNode.querySelector('.wavesurfer-container7').getAttribute('id');   
+    
+    var wavesurfer7 = WaveSurfer.create({
+      container: wavesurferContainer,
+      waveColor: '#FFFFFF',
+      progressColor: '#DB57DE',
+      height: '40',
+      cursorWidth: '0',
+      hideScrollbar: 'true',
+      backend: 'MediaElement'
+    });
+
+    var obj = {};
+    obj["button"] = button;
+    obj["player"] = wavesurfer7;
+    
+    players.push(obj);
+    
+    wavesurfer7.load( 'https://cdn.shopify.com/s/files/1/0541/0101/6759/files/Female_Vocal_Loop.mp3?v=1694552019');
+    
+    button.addEventListener('click', (e) => {
+      if (wavesurfer7.isPlaying()) {
+        wavesurfer7.pause();
+        button.src = 'https://cdn.shopify.com/s/files/1/0541/0101/6759/files/white_play_icon_ee8f59d9-e1ce-49b4-ac6b-829dad006a0e.png?v=1684068399';
+      } else {
+          console.log(players, 'players');
+          
+          players.forEach(function (element) {
+            if(element.player.isPlaying() && wavesurfer7 != element.player){
+                element.player.pause();
+                element.button.src = 'https://cdn.shopify.com/s/files/1/0541/0101/6759/files/white_play_icon_ee8f59d9-e1ce-49b4-ac6b-829dad006a0e.png?v=1684068399';
+            }
+          });
+        wavesurfer7.play();
+        button.src = 'https://cdn.shopify.com/s/files/1/0541/0101/6759/files/pause-icon-18-256.png?v=1684068402';
+          
+      }
+    });
+  });
+        } catch(err){}
+      </script>
+    
+    </div>
+
+      
+    </gp-row>
+  
+        </section>
+      
+  
+    
+{% schema %}
+  {
+    "presets": [{ "name": "Section - Dec 18 12:21:05" }],
+    "name": "Section - Dec 18 12:21:05",
+    "tag": "section",
+    "class": "gps-492164104987870094 gps gpsil",
+    "settings": [{"type":"paragraph","content":"Section design by GemPages. [Click here to start design](https://admin.shopify.com/store/shreya-cirkle-2/apps/gempages-cro/app/shopify/edit?pageType=THEME_SECTION&editorId=492164104987870094)"},{"type":"select","label":"Section Preload","id":"section_preload","options":[{"label":"On","value":"true"},{"label":"Off","value":"false"},{"label":"Off Lazy Script","value":"off_lazy_script"}],"default":"off_lazy_script"},{"type":"text","label":"Checksum","id":"checksum"}],
+    "blocks": [{"type": "@app"}],
+    "locales": {}
+  }
+{% endschema %}

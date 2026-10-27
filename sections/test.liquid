@@ -1,0 +1,15 @@
+<div className="slide">
+  {% content_for 'blocks' %}
+</div>
+
+{% schema %}
+{
+  "name": "Slideshow",
+  "blocks": [{"type": "@app"}, {"type": "@theme"}],
+  "presets": [
+    {
+        "name": "Test"
+    }
+  ]
+}
+{% endschema %}

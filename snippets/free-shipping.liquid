@@ -1,0 +1,73 @@
+<div id="free-shipping-bar" class="bg-green-100 p-3 rounded mb-4">
+  <div class="flex justify-between items-center mb-1 text-green-800 font-medium">
+    <span id="free-shipping-text"> Spend <span id="free-shipping-amount"></span> more to get free shipping! </span>
+    <span id="free-shipping-percent">0%</span>
+  </div>
+  <div class="w-full bg-green-200 rounded h-3">
+    <div id="free-shipping-progress" class="bg-green-600 h-3 rounded" style="width: 0%;"></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const freeShippingThreshold = 4000; // Store default currency threshold
+    const barText = document.getElementById('free-shipping-text');
+    const amountSpan = document.getElementById('free-shipping-amount');
+    const progressBar = document.getElementById('free-shipping-progress');
+    const percentSpan = document.getElementById('free-shipping-percent');
+
+    function updateFreeShippingBar() {
+      // Get cart total in store currency
+      let cartTotalCents = 0;
+
+      // Dawn AJAX cart stores subtotal in data attribute
+      const subtotalEl = document.querySelector('[data-cart-subtotal]');
+      if (subtotalEl) {
+        cartTotalCents = parseInt(subtotalEl.dataset.amount) || 0;
+      }
+
+      const cartTotal = cartTotalCents / 100; // store currency units
+      const remaining = freeShippingThreshold - cartTotal;
+
+      // Progress percentage
+      const percent = Math.min((cartTotal / freeShippingThreshold) * 100, 100);
+      progressBar.style.width = percent + '%';
+      percentSpan.textContent = Math.floor(percent) + '%';
+
+      if (remaining > 0) {
+        const localAmount = remaining * Shopify.currency.rate;
+        amountSpan.textContent = Shopify.formatMoney(localAmount * 100, Shopify.money_format);
+        barText.textContent = 'Spend ' + amountSpan.textContent + ' more to get free shipping!';
+      } else {
+        barText.textContent = '🎉 You qualify for free shipping!';
+      }
+    }
+
+    // Initial load
+    updateFreeShippingBar();
+
+    // Listen to quantity input changes in the cart
+    const qtyInputs = document.querySelectorAll('.cart__quantity-input');
+    qtyInputs.forEach((input) => {
+      input.addEventListener('input', updateFreeShippingBar);
+      input.addEventListener('change', updateFreeShippingBar);
+    });
+
+    // Listen to Dawn cart drawer AJAX updates
+    document.addEventListener('cart:updated', updateFreeShippingBar);
+  });
+</script>
+
+<style>
+  #free-shipping-bar {
+      background-color: #d1fae5; /* green-100 */
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    #free-shipping-progress {
+      transition: width 0.3s ease;
+    }
+</style>
