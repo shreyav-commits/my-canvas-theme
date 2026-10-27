@@ -1,0 +1,569 @@
+{% block 'container', class: 'w-full max-w-page mx-auto px-margin' %}
+  {%- assign product_title = product.title -%}
+  {%- if product_title == blank -%}
+    {%- assign product_title = 'product.placeholder_title' | t -%}
+  {%- endif -%}
+  {%- # theme-check-disable-next-line UnknownFilter %}
+  <s-view-event class="block pb-4" view-event-trigger="connect" view-event-payload="{{ product | standard_event_data: 'view', context: 'page' | escape }}">
+  {%- comment -%} Product Detail: 60/40 Split {%- endcomment -%}
+  <div class="grid grid-cols-1 product-grid gap-6 md:gap-12 mb-16">
+    {%- comment -%} Left: Image Gallery (60%) {%- endcomment -%}
+    <s-product-image-zoom class="block">
+        {%- liquid
+          # product-grid gives the gallery 2/3 of the width after gutters and the 48px gap.
+          # Gallery rhythm 1:2:1:2 on desktop: slots 1, 4, 7... span the full width, the others sit two-up. A trailing item that would sit alone also spans full.
+          # Mirror the first-image sizes in snippets/lcp-preload.liquid; mobile stays full bleed.
+          assign gallery_sizes_large = '(min-width: 1280px) 768px, (min-width: 768px) calc((100vw - 128px) * 2 / 3), 100vw'
+          assign gallery_sizes_small = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 128px) / 3), 100vw'
+        -%}
+        {%- comment -%} One media loop scrolls horizontally on mobile and becomes the contained desktop grid. Native media controls own keyboard focus so the desktop gallery adds no redundant tab stop. {%- endcomment -%}
+        {%- comment -%} The selected variant's image leads the gallery. s-variant-picker.js re-fetches this "product-gallery" partial on variant change so the image follows the chosen color. {%- endcomment -%}
+        {%- assign featured_media_id = product.selected_or_first_available_variant.featured_media.id | default: 0 -%}
+        {% partial 'product-gallery' %}
+        <div
+          data-product-gallery
+          data-variant-gallery
+          {% if product.media != blank %}role="region" aria-label="{{ product_title | escape }}"{% endif %}
+          class="mx-[calc(-1*var(--spacing-margin)-max(0px,(100vw-var(--spacing-page))/2))] w-[calc(100%+2*var(--spacing-margin)+max(0px,100vw-var(--spacing-page)))] flex snap-x snap-mandatory overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:w-auto md:snap-none md:overflow-visible {% if product.media.size > 1 %}md:grid-cols-2 md:gap-3{% endif %}"
+        >
+          {% if product.media == blank %}
+            {% render 'placeholder-texture', kind: 'product', seed: 1, class: 'shrink-0 snap-center w-full aspect-square contain-paint md:aspect-4/5', aria_label: product_title %}
+          {% endif %}
+          {%- assign gallery_index = 0 -%}
+          {%- for gallery_pass in (1..2) -%}
+          {% for media in product.media %}
+            {%- liquid
+              if gallery_pass == 1 and media.id != featured_media_id
+                continue
+              endif
+              if gallery_pass == 2 and media.id == featured_media_id
+                continue
+              endif
+              assign gallery_index = gallery_index | plus: 1
+              assign gallery_slot = gallery_index | minus: 1 | modulo: 3
+              assign gallery_full = false
+              if gallery_slot == 0
+                assign gallery_full = true
+              elsif gallery_slot == 1 and gallery_index == product.media.size
+                assign gallery_full = true
+              endif
+              if gallery_full
+                assign gallery_sizes = gallery_sizes_large
+              else
+                assign gallery_sizes = gallery_sizes_small
+              endif
+            -%}
+            <div class="relative shrink-0 snap-center w-full contain-paint{% if gallery_full %} md:col-span-2{% endif %}">
+              {%- if gallery_index == 1 -%}
+                {% render 'product-badges', product: product, variant: product.selected_or_first_available_variant, class: 'absolute top-3 start-3 z-10 pointer-events-none md:top-4 md:start-4' %}
+              {%- endif -%}
+              {%- if media.media_type == 'image' -%}
+                {%- liquid
+                  assign image_label = media.alt | default: media.preview_image.alt | default: product_title
+                  assign zoom_dialog_id = 'product-image-zoom-' | append: media.id
+                -%}
+                <div class="aspect-square overflow-hidden bg-surface-secondary {% if product.media.size == 1 %}md:aspect-4/5{% endif %}">
+                  <button
+                    type="button"
+                    commandfor="{{ zoom_dialog_id }}"
+                    command="show-modal"
+                    data-zoom-preload
+                    aria-haspopup="dialog"
+                    aria-controls="{{ zoom_dialog_id }}"
+                    aria-label="{{ 'product.view_image' | t: title: image_label | escape }}"
+                    class="group block size-full cursor-zoom-in bg-surface-secondary p-0 motion-safe:transition-transform motion-safe:active:scale-[0.97] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
+                  >
+                    {%- if gallery_index == 1 -%}
+                      {% block 'image', image: media, alt: image_label, sizes: gallery_sizes, class: 'motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-[1.03]', attributes: 'loading="eager" fetchpriority="high"' %}{% endblock %}
+                    {%- else -%}
+                      {% block 'image', image: media, alt: image_label, sizes: gallery_sizes, class: 'motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-[1.03]', attributes: 'loading="lazy"' %}{% endblock %}
+                    {%- endif -%}
+                  </button>
+                </div>
+              {%- elsif media.media_type == 'video' -%}
+                <div class="aspect-square overflow-hidden {% if product.media.size == 1 %}md:aspect-4/5{% endif %}">
+                  {% block 'video', video: media, class: 'size-full object-cover' %}{% endblock %}
+                </div>
+              {%- elsif media.media_type == 'external_video' -%}
+                {%- liquid
+                  assign external_youtube_id = ''
+                  assign external_vimeo_id = ''
+                  if media.host == 'youtube'
+                    assign external_youtube_id = media.external_id
+                  elsif media.host == 'vimeo'
+                    assign external_vimeo_id = media.external_id
+                  endif
+                  assign external_video_label = media.alt | default: media.preview_image.alt | default: product_title
+                -%}
+                <div class="aspect-square overflow-hidden {% if product.media.size == 1 %}md:aspect-4/5{% endif %}">
+                  {% block 'video', youtube_id: external_youtube_id, vimeo_id: external_vimeo_id, class: 'size-full object-cover' %}
+                    {%- if gallery_index == 1 -%}
+                      {% block 'image', fallback_image: media.preview_image, alt: external_video_label, sizes: gallery_sizes, placeholder_kind: 'surface', attributes: 'loading="eager" fetchpriority="high"' %}{% endblock %}
+                    {%- else -%}
+                      {% block 'image', fallback_image: media.preview_image, alt: external_video_label, sizes: gallery_sizes, placeholder_kind: 'surface', attributes: 'loading="lazy"' %}{% endblock %}
+                    {%- endif -%}
+                  {% endblock %}
+                </div>
+              {%- endif -%}
+            </div>
+          {% endfor %}
+          {% endfor %}
+        </div>
+        {% endpartial %}
+
+        {%- assign zoom_widths = '750,1100,1500,2000,2400' | split: ',' -%}
+        {% for media in product.media %}
+          {%- if media.media_type == 'image' -%}
+            {%- liquid
+              assign zoom_image = media.preview_image | default: media
+              assign image_label = media.alt | default: zoom_image.alt | default: product_title
+              assign zoom_dialog_id = 'product-image-zoom-' | append: media.id
+              assign zoom_title_id = zoom_dialog_id | append: '-title'
+            -%}
+            {%- capture zoom_srcset -%}
+              {%- for width in zoom_widths -%}
+                {%- assign image_width = width | strip | plus: 0 -%}
+                {{ zoom_image | image_url: width: image_width }} {{ image_width }}w{%- unless forloop.last -%},{%- endunless -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+
+            {%- comment -%} Gallery commands open a full-bleed, fade-only surface: no closed transform and no extra backdrop dimming. {%- endcomment -%}
+            <s-dialog>
+              <dialog id="{{ zoom_dialog_id }}" class="overlay-panel [--panel-backdrop:transparent] fixed inset-0 w-screen h-dvh rounded-none bg-overlay text-surface shadow-none" aria-labelledby="{{ zoom_title_id }}">
+                <div class="relative flex size-full items-center justify-center">
+                  <h2 id="{{ zoom_title_id }}" class="sr-only">{{ 'product.image_zoom' | t }}</h2>
+                  {%- comment -%} Zoom media stays full bleed; only the close control moves inside the safe viewport. {%- endcomment -%}
+                  {%- capture zoom_close_button_attrs -%}aria-label="{{ 'general.close' | t | escape }}"{%- endcapture -%}
+                  {% block 'button', commandfor: zoom_dialog_id, command: 'close', variant: 'button-ghost', class: 'absolute z-10 size-touch-target rounded-full bg-overlay-subtle text-surface hover:bg-overlay-strong inset-bs-[max(1rem,var(--safe-area-inset-top))] inset-e-[max(1rem,var(--safe-area-inset-inline-end))]', attributes: zoom_close_button_attrs %}<span class="inline-flex items-center justify-center shrink-0 size-5" aria-hidden="true">{{- 'icon-x.svg' | inline_asset_content -}}</span>{% endblock %}
+                  <img
+                    src="{{ zoom_image | image_url: width: 1500 }}"
+                    srcset="{{ zoom_srcset | strip }}"
+                    sizes="100vw"
+                    loading="lazy"
+                    alt="{{ image_label | escape }}"
+                    width="{{ zoom_image.width }}"
+                    height="{{ zoom_image.height }}"
+                    class="size-full object-contain"
+                    data-zoom-image
+                  >
+                </div>
+              </dialog>
+            </s-dialog>
+          {%- endif -%}
+        {% endfor %}
+      </s-product-image-zoom>
+      <script type="module" src="{{ 's-product-image-zoom.js' | asset_url }}"></script>
+
+    {%- comment -%} Right: Product Information (40%) {%- endcomment -%}
+    {%- comment -%} The product-title and product-form partials declared below are fetched by s-variant-picker.js on product-page variant changes — keep both partial names stable. {%- endcomment -%}
+    {%- assign current_variant = product.selected_or_first_available_variant -%}
+
+    <div class="flex flex-col gap-6 md:sticky md:top-8 md:self-start">
+      {% partial 'product-title' %}
+      {%- liquid
+        # Bold & punchy: sale badge, oversized price with a savings pill, and the free shipping promise.
+        assign on_sale = false
+        if current_variant.compare_at_price > current_variant.price
+          assign on_sale = true
+          assign sale_savings = current_variant.compare_at_price | minus: current_variant.price
+          assign sale_savings_money = sale_savings | money
+        endif
+        assign pdp_free_shipping_cents = settings.free_shipping_threshold | default: 0 | times: 100
+        assign pdp_free_shipping_money = pdp_free_shipping_cents | money_without_trailing_zeros
+      -%}
+      <div class="pt-4 md:pt-8">
+        {%- assign crumb_collection = collection | default: product.collections.first -%}
+        <nav aria-label="{{ 'product.breadcrumb_label' | t | escape }}" class="mb-6 hidden md:block">
+          <ol role="list" class="flex flex-wrap items-center gap-2 text-[0.6875rem] uppercase tracking-[0.16em] text-on-surface-secondary">
+            <li><a href="{{ routes.root_url }}" class="hover:text-on-surface motion-safe:transition-colors">{{ 'product.breadcrumb_home' | t }}</a></li>
+            {%- if crumb_collection != blank -%}
+              <li aria-hidden="true" class="text-on-surface/30">/</li>
+              <li><a href="{{ crumb_collection.url }}" class="hover:text-on-surface motion-safe:transition-colors">{{ crumb_collection.title | escape }}</a></li>
+            {%- endif -%}
+          </ol>
+        </nav>
+        <div class="flex flex-wrap items-center gap-3 mb-3">
+          {% if product.vendor != blank %}
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.6875rem] font-medium text-accent uppercase tracking-[0.2em]' %}<bdi>{{ product.vendor | escape }}</bdi>{% endblock %}
+          {% endif %}
+        </div>
+        {% block 'text', tag: 'h1', variant: 'type-heading-lg', class: 'text-on-surface font-normal text-[1.75rem] leading-[1.15] tracking-[0.01em] md:text-[2.25rem] text-balance' %}{{ product_title | escape }}{% endblock %}
+        <span class="mt-4 block h-px w-10 bg-on-surface/40" aria-hidden="true"></span>
+        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2" data-product-price>
+          {% block 'price', price: current_variant.price, compare_at_price: current_variant.compare_at_price, variant: 'type-heading-sm', class: 'font-normal tracking-[0.02em] text-on-surface' %}{% endblock %}
+          {% if on_sale %}
+            <span class="inline-flex items-center border border-sale/60 px-2.5 py-1 text-[0.625rem] font-medium uppercase tracking-[0.16em] text-sale">{{ 'product.save_amount' | t: amount: sale_savings_money }}</span>
+          {% endif %}
+        </div>
+        {% if pdp_free_shipping_cents > 0 %}
+          <p class="mt-4 flex items-center gap-2 text-xs text-on-surface-secondary">
+            <span class="inline-flex size-4 shrink-0" aria-hidden="true">{{- 'icon-truck.svg' | inline_asset_content -}}</span>
+            {{ 'product.free_shipping_over' | t: amount: pdp_free_shipping_money }}
+          </p>
+        {% endif %}
+      </div>
+      {% endpartial %}
+
+      {%- comment -%} === PRODUCT FORM (commerce-critical) ===
+        This {% partial 'product-form' %} region is swapped by s-variant-picker.js on variant change.
+        The partial name, the {% form %} tag, and the hidden input[name="id"] are all load-bearing —
+        removing or renaming any of them breaks add-to-cart and variant switching.
+        <s-product-form> wraps the form so add-to-cart calls Shopify.actions.updateCart
+        with the selected variant/quantity while preserving the native product form
+        action as the no-JS fallback. standard-actions-override.js keeps the cart
+        update on-page by refreshing <s-cart> partials; <s-product-form> then opens
+        the drawer with Shopify.actions.openCart(). {%- endcomment -%}
+      <s-product-form class="block" data-product-form data-product-id="{{ product.id }}" data-cart-add-url="{{ routes.cart_add_url }}" data-error-message="{{ 'cart.update_error' | t | escape }}">
+        {% partial 'product-form' %}
+        {%- comment -%} Read by s-variant-picker.js to resolve the ProductSelectEvent promise
+          with the freshly-selected variant. Re-rendered inside the 'product-form' partial
+          on every variant change so the next read returns the new variant's data.
+          standard_event_data encodes the less-than character as <, so a literal
+          closing-script in product metafields cannot terminate this tag early. {%- endcomment -%}
+        {%- # theme-check-disable UnknownFilter %}
+        <script type="application/json" data-product-view-payload>{{ product | standard_event_data: 'view' }}</script>
+        {%- # theme-check-enable UnknownFilter %}
+        {%- assign product_form_error_id = 'product-form-error-' | append: product.id -%}
+        {% form 'product', product %}
+          {% if product.variants.size > 1 %}
+            <s-variant-picker class="block space-y-4" data-preselected="{% if product.selected_variant %}true{% else %}false{% endif %}" data-updated-message="{{ 'accessibility.variant_updated' | t }}" data-error-message="{{ 'accessibility.update_error' | t | escape }}" data-product-id="{{ product.id }}" data-product-title="{{ product.title | escape }}" data-product-handle="{{ product.handle }}">
+              {%- for option in product.options_with_values -%}
+                {%- block 'variant-picker', product: product, option: option, option_type: 'dropdown', show_selected_value: false -%}{%- endblock -%}
+              {%- endfor -%}
+              {%- comment -%} Variant refresh feedback stays separate from the add-to-cart error owned by s-product-form. {%- endcomment -%}
+              <p data-variant-picker-error hidden class="text-sm text-sale">{{ 'accessibility.update_error' | t }}</p>
+            </s-variant-picker>
+          {% endif %}
+          {%- comment -%} The sole submitted variant ID stays in the partial across selector styles and single-variant products; s-variant-picker updates it on change. {%- endcomment -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+          <div class="flex items-center gap-4 mb-10">
+            <div class="shrink-0">
+              <label for="product-quantity" class="mb-2 block text-[0.6875rem] uppercase tracking-[0.16em] text-on-surface-secondary">{{ 'product.quantity' | t }}</label>
+              {%- liquid
+                assign qty_min = current_variant.quantity_rule.min | default: 1
+                assign qty_max = current_variant.quantity_rule.max
+                assign qty_step = current_variant.quantity_rule.increment | default: 1
+              -%}
+              {% block 'quantity-selector', id: 'product-quantity', name: 'quantity', value: qty_min, min: qty_min, max: qty_max, step: qty_step %}{% endblock %}
+            </div>
+          </div>
+
+          {%- if current_variant.available -%}
+            {%- comment -%} Stock urgency: low tracked stock pulses a "selling fast" note; otherwise a calm in-stock signal. Lives in the product-form partial so it follows the selected variant. {%- endcomment -%}
+            {%- liquid
+              assign low_stock = false
+              assign is_preorder = false
+              for tag in product.tags
+                assign tag_key = tag | downcase | remove: ' ' | remove: '-' | remove: '_'
+                if tag_key == 'preorder'
+                  assign is_preorder = true
+                endif
+              endfor
+              if current_variant.inventory_management != blank and current_variant.inventory_quantity <= 0 and current_variant.inventory_policy == 'continue'
+                assign is_preorder = true
+              endif
+              if current_variant.inventory_management != blank and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= 10
+                assign low_stock = true
+              endif
+            -%}
+            <p class="-mt-4 mb-5 flex items-center gap-2.5 text-[0.6875rem] uppercase tracking-[0.16em] {% if low_stock %}text-sale{% else %}text-on-surface-secondary{% endif %}">
+              <span class="relative inline-flex size-1.5" aria-hidden="true">
+                <span class="relative inline-flex size-1.5 rounded-full {% if low_stock %}bg-sale{% else %}bg-success{% endif %}"></span>
+              </span>
+              {%- if is_preorder -%}
+                {{ 'product.preorder_note' | t }}
+              {%- elsif low_stock -%}
+                {{ 'product.only_left' | t: count: current_variant.inventory_quantity }}
+              {%- else -%}
+                {{ 'product.in_stock' | t }}
+              {%- endif -%}
+            </p>
+            {%- liquid
+              # Options start unselected: until the shopper picks every option (or opens a ?variant= link) the button stays disabled. s-variant-picker.js lifts the gate.
+              assign options_pending = false
+              if product.has_only_default_variant == false and product.selected_variant == blank
+                assign options_pending = true
+              endif
+            -%}
+            {%- capture add_button_attrs -%}aria-describedby="{{ product_form_error_id }}" data-add-button{% if options_pending %} disabled aria-disabled="true"{% endif %}{%- endcapture -%}
+            {% block 'button', type: 'submit', name: 'add', variant: 'button-primary', class: 'h-14 px-6 text-xs font-medium uppercase tracking-[0.22em] rounded-button w-full motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed', attributes: add_button_attrs %}
+              <span data-add-label-ready{% if options_pending %} hidden{% endif %}>{%- if is_preorder -%}{{- 'product.preorder_button' | t -}}{%- else -%}{{- 'product.add_to_cart' | t -}}{%- endif -%}</span>
+              <span data-add-label-pending{% unless options_pending %} hidden{% endunless %}>{{- 'product.select_options_button' | t -}}</span>
+            {% endblock %}
+          {%- else -%}
+            {%- comment -%}
+              type="button" prevents keyboard form submission when sold out; aria-disabled is set by the block.
+              That leaves no signal the button block can read, so inert states the placeholder has no destination.
+            {%- endcomment -%}
+            {% block 'button', type: 'button', inert: true, variant: 'button-primary', class: 'h-11 px-3 text-sm rounded-button w-full', disabled: true %}{{- 'product.sold_out' | t -}}{% endblock %}
+          {%- endif -%}
+
+          <p id="{{ product_form_error_id }}" data-add-to-cart-error role="alert" hidden class="mt-3 text-sm text-sale"></p>
+
+          <div data-payment-buttons{% if options_pending %} hidden{% endif %} class="mt-3 [--shopify-accelerated-checkout-button-block-size:var(--spacing-touch-target)] [--shopify-accelerated-checkout-button-border-radius:var(--radius-button)] [--shopify-accelerated-checkout-button-box-shadow:none] [--shopify-accelerated-checkout-skeleton-background-color:var(--color-surface-secondary)]">
+            {{ form | payment_button }}
+          </div>
+        {% endform %}
+
+        {%- comment -%} Trust row: each label is its own editable text block. {%- endcomment -%}
+        <ul role="list" class="mt-8 grid grid-cols-3 divide-x divide-on-surface/15 border-y border-on-surface/15 py-5 text-center">
+          <li class="flex flex-col items-center gap-2.5 px-2">
+            <span class="inline-flex size-5 text-on-surface/70" aria-hidden="true">{{- 'icon-lock.svg' | inline_asset_content -}}</span>
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.625rem] font-medium uppercase tracking-[0.16em] text-on-surface-secondary' %}{{- 'product.trust_secure' | t -}}{% endblock %}
+          </li>
+          <li class="flex flex-col items-center gap-2.5 px-2">
+            <span class="inline-flex size-5 text-on-surface/70" aria-hidden="true">{{- 'icon-return.svg' | inline_asset_content -}}</span>
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.625rem] font-medium uppercase tracking-[0.16em] text-on-surface-secondary' %}{{- 'product.trust_returns' | t -}}{% endblock %}
+          </li>
+          <li class="flex flex-col items-center gap-2.5 px-2">
+            <span class="inline-flex size-5 text-on-surface/70" aria-hidden="true">{{- 'icon-truck.svg' | inline_asset_content -}}</span>
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.625rem] font-medium uppercase tracking-[0.16em] text-on-surface-secondary' %}{{- 'product.trust_delivery' | t -}}{% endblock %}
+          </li>
+        </ul>
+
+        {% endpartial %}
+      </s-product-form>
+
+      {%- comment -%}
+        Frequently bought together: this product + up to 2 companions. Companions come from the
+        custom.completelook metafield first, then fill from the product's first collection.
+        s-fbt.js keeps the total live and adds every checked item in one go.
+      {%- endcomment -%}
+      {%- liquid
+        assign fbt_limit = 2
+        assign fbt_handles = '|'
+        assign fbt_count = 0
+        for fbt_candidate in product.metafields.custom.completelook.value
+          if fbt_count >= fbt_limit
+            break
+          endif
+          assign fbt_key = '|' | append: fbt_candidate.handle | append: '|'
+          if fbt_handles contains fbt_key
+            continue
+          endif
+          if fbt_candidate.id != product.id and fbt_candidate.available
+            assign fbt_handles = fbt_handles | append: fbt_candidate.handle | append: '|'
+            assign fbt_count = fbt_count | plus: 1
+          endif
+        endfor
+        if fbt_count < fbt_limit
+          assign fbt_collection = collection
+          if fbt_collection == blank
+            for fbt_col in product.collections
+              if fbt_col.handle == 'all' or fbt_col.handle contains 'globofilter' or fbt_col.handle contains 'cloud-search' or fbt_col.products_count > 1000
+                continue
+              endif
+              assign fbt_collection = fbt_col
+              break
+            endfor
+          endif
+          for fbt_candidate in fbt_collection.products limit: 12
+            if fbt_count >= fbt_limit
+              break
+            endif
+            assign fbt_key = '|' | append: fbt_candidate.handle | append: '|'
+            if fbt_handles contains fbt_key
+              continue
+            endif
+            if fbt_candidate.id != product.id and fbt_candidate.available
+              assign fbt_handles = fbt_handles | append: fbt_candidate.handle | append: '|'
+              assign fbt_count = fbt_count | plus: 1
+            endif
+          endfor
+        endif
+        assign fbt_handle_list = fbt_handles | remove_first: '|' | split: '|'
+      -%}
+      {%- if fbt_count > 0 and current_variant.available -%}
+        {%- capture fbt_main_prices -%}{ {%- for v in product.variants -%}"{{ v.id }}":{{ v.price }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }{%- endcapture -%}
+        <s-fbt
+          class="block border border-on-surface/15 p-5 md:p-6"
+          data-product-id="{{ product.id }}"
+          data-cart-add-url="{{ routes.cart_add_url }}"
+          data-money-sample="{{ 123456 | money | strip_html | escape }}"
+          data-main-prices="{{ fbt_main_prices | escape }}"
+          data-select-message="{{ 'product.fbt_select_options' | t | escape }}"
+          data-error-message="{{ 'cart.update_error' | t | escape }}"
+        >
+          {% block 'text', tag: 'h2', variant: 'type-body-sm', class: 'text-xs font-medium uppercase tracking-[0.18em] text-on-surface' %}{{- 'product.fbt_heading' | t -}}{% endblock %}
+
+          <div class="mt-5 flex items-center gap-2" aria-hidden="true">
+            <div data-fbt-image="0" class="w-16 shrink-0 overflow-hidden bg-surface-secondary motion-safe:transition-opacity">
+              {% block 'image', fallback_image: product.featured_image, placeholder_kind: 'product', aspect_ratio: 'aspect-[3/4]', sizes: '64px', attributes: 'loading="lazy"', alt: '' %}{% endblock %}
+            </div>
+            {%- for fbt_handle in fbt_handle_list -%}
+              {%- assign fbt_product = all_products[fbt_handle] -%}
+              <span class="text-on-surface/40">+</span>
+              <a href="{{ fbt_product.url }}" tabindex="-1" data-fbt-image="{{ forloop.index }}" class="block w-16 shrink-0 overflow-hidden bg-surface-secondary motion-safe:transition-opacity">
+                {% block 'image', fallback_image: fbt_product.featured_image, placeholder_kind: 'product', aspect_ratio: 'aspect-[3/4]', sizes: '64px', attributes: 'loading="lazy"', alt: '' %}{% endblock %}
+              </a>
+            {%- endfor -%}
+          </div>
+
+          <ul role="list" class="mt-5 flex flex-col gap-3">
+            <li>
+              <label class="flex cursor-pointer items-start gap-3 text-sm">
+                <input type="checkbox" checked data-fbt-item data-fbt-main data-variant-id="{{ current_variant.id }}" data-price="{{ current_variant.price }}" class="mt-0.5 size-4 shrink-0 accent-[var(--color-on-surface)]">
+                <span class="min-w-0 flex-1 text-on-surface"><span class="text-on-surface-secondary">{{ 'product.fbt_this_item' | t }}</span> {{ product_title | escape }}</span>
+                <span class="shrink-0 text-on-surface" data-fbt-main-price>{{ current_variant.price | money }}</span>
+              </label>
+            </li>
+            {%- for fbt_handle in fbt_handle_list -%}
+              {%- assign fbt_product = all_products[fbt_handle] -%}
+              {%- assign fbt_variant = fbt_product.selected_or_first_available_variant -%}
+              <li>
+                <label class="flex cursor-pointer items-start gap-3 text-sm">
+                  <input type="checkbox" checked data-fbt-item data-variant-id="{{ fbt_variant.id }}" data-price="{{ fbt_variant.price }}" class="mt-0.5 size-4 shrink-0 accent-[var(--color-on-surface)]">
+                  <span class="min-w-0 flex-1 text-on-surface">
+                    {{ fbt_product.title | escape }}
+                    {%- unless fbt_product.has_only_default_variant %}<span class="block text-xs text-on-surface-secondary">{{ fbt_variant.title | escape }}</span>{% endunless -%}
+                  </span>
+                  <span class="shrink-0 text-on-surface">{{ fbt_variant.price | money }}</span>
+                </label>
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          <div class="mt-5 flex flex-col gap-4 border-t border-on-surface/15 pt-5">
+            <p class="flex items-baseline justify-between gap-4 text-sm">
+              <span class="text-[0.6875rem] uppercase tracking-[0.16em] text-on-surface-secondary">{{ 'product.fbt_total' | t }}</span>
+              <span class="text-base text-on-surface" data-fbt-total>{{ current_variant.price | money }}</span>
+            </p>
+            <button type="button" data-fbt-add class="button-secondary inline-flex h-12 w-full items-center justify-center gap-2 border border-on-surface rounded-button px-5 text-xs font-medium uppercase tracking-[0.22em] motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed aria-busy:opacity-60">
+              {{ 'product.fbt_add' | t }} (<span data-fbt-count>{{ fbt_count | plus: 1 }}</span>)
+            </button>
+            <p data-fbt-error role="alert" hidden class="text-xs text-sale"></p>
+          </div>
+        </s-fbt>
+        <script type="module" src="{{ 's-fbt.js' | asset_url }}"></script>
+      {%- endif -%}
+
+      {%- comment -%} Product Description {%- endcomment -%}
+      {%- comment -%} Unconditional sr-only h2 ensures heading hierarchy is valid even when no description exists, preserving the semantic outline across all product pages {%- endcomment -%}
+      <h2 class="sr-only">{{ 'product.details' | t }}</h2>
+
+      {%- comment -%} Details accordion: description opens by default; shipping and care notes are shared copy in locales. {%- endcomment -%}
+      {%- capture acc_icon -%}<span class="relative inline-flex size-3 shrink-0" aria-hidden="true"><span class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-current"></span><span class="absolute inset-y-0 start-1/2 w-px -translate-x-1/2 bg-current motion-safe:transition-transform group-open:scale-y-0"></span></span>{%- endcapture -%}
+      <div class="divide-y divide-on-surface/15 border-y border-on-surface/15">
+        {% if product.description != blank %}
+          <details class="group" open>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-medium uppercase tracking-[0.18em] text-on-surface [&::-webkit-details-marker]:hidden">
+              <h3 class="m-0 font-body text-xs font-medium uppercase tracking-[0.18em]">{{ 'product.description' | t }}</h3>{{ acc_icon }}
+            </summary>
+            <div class="pb-6">
+              {%- comment -%} The schema-backed setting keeps the product description connected as rich text instead of flattening its internal treatments through the text block. {%- endcomment -%}
+              {% block 'richtext', text: product.description, class: 'text-sm leading-relaxed text-on-surface-secondary' %}{% endblock %}
+            </div>
+          </details>
+        {% endif %}
+        <details class="group">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-medium uppercase tracking-[0.18em] text-on-surface [&::-webkit-details-marker]:hidden">
+            <h3 class="m-0 font-body text-xs font-medium uppercase tracking-[0.18em]">{{ 'product.shipping_heading' | t }}</h3>{{ acc_icon }}
+          </summary>
+          {% block 'text', variant: 'type-body-sm', class: 'pb-6 text-sm leading-relaxed text-on-surface-secondary' %}{{ 'product.shipping_body' | t }}{% endblock %}
+        </details>
+        <details class="group">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-medium uppercase tracking-[0.18em] text-on-surface [&::-webkit-details-marker]:hidden">
+            <h3 class="m-0 font-body text-xs font-medium uppercase tracking-[0.18em]">{{ 'product.care_heading' | t }}</h3>{{ acc_icon }}
+          </summary>
+          {% block 'text', variant: 'type-body-sm', class: 'pb-6 text-sm leading-relaxed text-on-surface-secondary' %}{{ 'product.care_body' | t }}{% endblock %}
+        </details>
+      </div>
+
+    </div>
+  </div>
+  </s-view-event>
+
+  <script type="module" src="{{ 's-variant-picker.js' | asset_url }}"></script>
+  <script type="module" src="{{ 's-product-form.js' | asset_url }}"></script>
+{% endblock %}
+
+{%- comment -%} You may also like: related recommendations in a 4-up carousel. This inline <s-product-recommendations> owns its own partial name so it never collides with the related-products upsell above. {%- endcomment -%}
+{%- liquid
+  assign ymal_limit = 8
+  assign ymal_url = routes.product_recommendations_url | append: '?intent=related&limit=' | append: ymal_limit
+  assign ymal_sizes = '(min-width: 1280px) 300px, (min-width: 640px) 25vw, 50vw'
+  assign ymal_label = 'product.you_may_also_like' | t
+-%}
+{% block 'container', class: 'w-full max-w-page mx-auto px-margin md:px-10 py-16 md:py-24 border-t border-on-surface/15', attributes: 'aria-labelledby="ymal-heading"' %}
+  <s-product-recommendations
+    class="block"
+    data-url="{{ ymal_url }}"
+    data-product-id="{{ product.id }}"
+    data-intent="related"
+    data-partial="complementary-recommendations"
+    data-performed="{{ recommendations.performed }}"
+  >
+    {%- comment -%} partials.apply() swaps this named region; keep the name in sync with data-partial above. {%- endcomment -%}
+    {%- partial 'complementary-recommendations' -%}
+      {%- capture ymal_heading -%}
+        {% block 'text', tag: 'h2', variant: 'type-heading-lg', attributes: 'id="ymal-heading"' %}{{- 'product.you_may_also_like' | t -}}{% endblock %}
+      {%- endcapture -%}
+      {%- if recommendations.performed -%}
+        {%- if recommendations.products_count > 0 -%}
+          {% block 'carousel', heading: ymal_heading, label: ymal_label, columns: 4, columns_mobile: 2 %}
+            {% for rec_product in recommendations.products limit: ymal_limit %}
+              {%- assign rec_variant = rec_product.selected_or_first_available_variant -%}
+              {%- # theme-check-disable-next-line UnknownFilter %}
+              <s-view-event class="block" view-event-trigger="intersect" view-event-payload="{{ rec_product | standard_event_data: 'view' | escape }}">
+                {% block 'card', block.name: 't:blocks.product_card', url: rec_product.url, aria_label: rec_product.title, border_radius: 'rounded-card' %}
+                  <a href="{{ rec_product.url | escape }}" class="relative block overflow-hidden rounded-[inherit] bg-surface-secondary motion-safe:transition-opacity hover:opacity-90" aria-label="{{ rec_product.title | escape }}">
+                    {% block 'image', fallback_image: rec_product.featured_image, placeholder_kind: 'product', aspect_ratio: 'aspect-[3/4]', sizes: ymal_sizes, alt: rec_product.title, attributes: 'loading="lazy"', seed: forloop.index %}{% endblock %}
+                  </a>
+                  <div class="flex flex-col gap-1 pt-1">
+                    {% block 'text', variant: 'type-body', tag: 'h3', class: 'text-on-surface line-clamp-2' %}{{ rec_product.title | escape }}{% endblock %}
+                    {% block 'price', price: rec_variant.price, compare_at_price: rec_variant.compare_at_price, price_min: rec_product.price_min, price_max: rec_product.price_max, class: 'text-sm text-on-surface-secondary self-start' %}{% endblock %}
+                  </div>
+                {% endblock %}
+              </s-view-event>
+            {% endfor %}
+          {% endblock %}
+        {%- endif -%}
+      {%- else -%}
+        {%- comment -%} Skeletons are only for pending data, not an empty completed response. {%- endcomment -%}
+        <div class="mb-8">{{ ymal_heading }}</div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" aria-hidden="true">
+          {%- for i in (1..4) -%}
+            <div class="aspect-[3/4] bg-surface-secondary motion-safe:animate-pulse"></div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    {%- endpartial -%}
+  </s-product-recommendations>
+{% endblock %}
+
+{%- comment -%} Recently viewed: rendered client-side from localStorage; hidden until the shopper has viewed another product. {%- endcomment -%}
+{%- liquid
+  assign rv_variant = product.selected_or_first_available_variant
+  assign rv_price = rv_variant.price | money
+  assign rv_image = ''
+  if product.featured_image
+    assign rv_image = product.featured_image | image_url: width: 600
+  endif
+  assign rv_alt = product.featured_image.alt | default: product.title
+  assign rv_label = 'product.recently_viewed' | t
+-%}
+{%- capture rv_current -%}{"handle":{{ product.handle | json }},"url":{{ product.url | json }},"title":{{ product.title | json }},"price":{{ rv_price | json }},"image":{{ rv_image | json }},"alt":{{ rv_alt | json }},"currency":{{ cart.currency.iso_code | json }}}{%- endcapture -%}
+{% block 'container', class: 'w-full max-w-page mx-auto px-margin md:px-10 pb-16 md:pb-24', attributes: 'aria-labelledby="rv-heading"' %}
+  <s-recently-viewed class="block" hidden data-limit="8" data-current="{{ rv_current | escape }}">
+    <template data-rv-template>
+      <div class="flex flex-col gap-3">
+        <a data-rv-link href="{{ routes.all_products_collection_url }}" class="relative block aspect-[3/4] overflow-hidden bg-surface-secondary motion-safe:transition-opacity hover:opacity-90" tabindex="-1" aria-hidden="true">
+          <img data-rv-image src="" alt="" loading="lazy" width="600" height="800" class="size-full object-cover">
+        </a>
+        <a data-rv-link href="{{ routes.all_products_collection_url }}" class="flex flex-col gap-1 no-underline text-on-surface hover:opacity-70 motion-safe:transition-opacity">
+          <span data-rv-title class="type-body line-clamp-2"></span>
+          <span data-rv-price class="text-sm text-on-surface-secondary"></span>
+        </a>
+      </div>
+    </template>
+    {%- capture rv_heading -%}
+      {% block 'text', tag: 'h2', variant: 'type-heading-lg', attributes: 'id="rv-heading"' %}{{- 'product.recently_viewed' | t -}}{% endblock %}
+    {%- endcapture -%}
+    {% block 'carousel', heading: rv_heading, label: rv_label, columns: 4, columns_mobile: 2 %}{% endblock %}
+  </s-recently-viewed>
+{% endblock %}
+
+<script type="module" src="{{ 's-product-recommendations.js' | asset_url }}"></script>
+<script type="module" src="{{ 's-carousel.js' | asset_url }}"></script>
+<script type="module" src="{{ 's-recently-viewed.js' | asset_url }}"></script>

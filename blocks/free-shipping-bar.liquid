@@ -1,0 +1,130 @@
+{% doc %}
+  Free shipping progress bar for the cart. A truck rides an animated striped
+  track toward a finish flag as the cart subtotal approaches the global
+  `free_shipping_threshold` theme setting. The shipping protection product
+  (global `shipping_protection_product` setting) never counts toward it.
+  Render inside a cart partial so it refreshes after every cart change.
+  Self-contained: callers pass an empty body.
+
+  @param {string} [class] - Additional CSS classes on the root element.
+  @param {string} [attributes] - Additional HTML attributes on the root element.
+
+  @category commerce
+  @renders div
+
+  @example
+  {% block 'free-shipping-bar', class: 'mb-6' %}{% endblock %}
+{% enddoc %}
+
+{%- liquid
+  assign threshold_cents = settings.free_shipping_threshold | default: 0 | times: 100
+  assign protection_handle = settings.shipping_protection_product.handle
+  assign qualifying_cents = cart.items_subtotal_price
+  for item in cart.items
+    if protection_handle != blank and item.product.handle == protection_handle
+      assign qualifying_cents = qualifying_cents | minus: item.final_line_price
+    endif
+  endfor
+  if qualifying_cents < 0
+    assign qualifying_cents = 0
+  endif
+
+  assign percent = 100
+  if threshold_cents > 0
+    assign percent = qualifying_cents | times: 100 | divided_by: threshold_cents
+  endif
+  if percent > 100
+    assign percent = 100
+  endif
+  assign remaining_cents = threshold_cents | minus: qualifying_cents
+  assign unlocked = false
+  if remaining_cents <= 0
+    assign unlocked = true
+  endif
+  assign remaining_money = remaining_cents | money
+  assign bar_id = 'free-shipping-bar-' | append: block.id
+-%}
+
+{%- if threshold_cents > 0 -%}
+<div
+  class="fsb {% if unlocked %}fsb--unlocked {% endif %}rounded-card border border-on-surface/15 bg-surface p-4{% if class != blank %} {{ class }}{% endif %}"
+  style="{% if block.settings.bar_color != blank %}--fsb-bar: {{ block.settings.bar_color }};{% endif %}{% if block.settings.track_color != blank %} --fsb-track: {{ block.settings.track_color }};{% endif %}"
+  {% if attributes != blank %}{{ attributes }}{% endif %}
+>
+  <p id="{{ bar_id }}-label" class="text-sm text-on-surface mb-4 [&_strong]:font-semibold">
+    {%- if unlocked -%}
+      {{ 'cart.free_shipping.success_html' | t }}
+    {%- else -%}
+      {{ 'cart.free_shipping.progress_html' | t: amount: remaining_money }}
+    {%- endif -%}
+  </p>
+  <div class="relative pe-5">
+    <div
+      class="fsb-track relative h-3 rounded-full overflow-visible"
+      role="progressbar"
+      aria-label="{{ 'cart.free_shipping.progress_label' | t | escape }}"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="{{ percent }}"
+      aria-describedby="{{ bar_id }}-label"
+    >
+      <div class="fsb-fill absolute inset-y-0 start-0 rounded-full" style="width: {{ percent }}%;"></div>
+      <span class="fsb-truck absolute top-1/2 size-8 text-on-surface" style="inset-inline-start: {{ percent }}%;" aria-hidden="true">
+        {{- 'icon-truck.svg' | inline_asset_content -}}
+      </span>
+    </div>
+    <span class="fsb-flag absolute -top-3 -end-1 text-lg leading-none" aria-hidden="true">🏁</span>
+  </div>
+</div>
+{%- endif -%}
+
+{% style %}
+  .fsb {
+    --fsb-bar: var(--color-accent);
+    --fsb-track: color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+  }
+  .fsb .fsb-track { background: var(--fsb-track); }
+  .fsb .fsb-fill {
+    background-color: var(--fsb-bar);
+    background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.28) 0 8px, transparent 8px 16px);
+    background-size: 22.6px 22.6px;
+    transition: width 600ms var(--ease-ui, ease);
+  }
+  .fsb .fsb-truck {
+    --truck-wheel: var(--color-surface);
+    transform: translate(-60%, -62%);
+    transition: inset-inline-start 600ms var(--ease-ui, ease);
+  }
+  [dir='rtl'] .fsb .fsb-truck { transform: translate(60%, -62%) scaleX(-1); }
+  .fsb--unlocked .fsb-fill { background-color: var(--color-success, var(--fsb-bar)); }
+  @media (prefers-reduced-motion: no-preference) {
+    .fsb .fsb-fill { animation: fsb-stripes 900ms linear infinite; }
+    .fsb .fsb-truck svg { animation: fsb-bounce 600ms ease-in-out infinite alternate; }
+    .fsb--unlocked .fsb-flag { animation: fsb-wave 700ms ease-in-out infinite alternate; transform-origin: bottom left; }
+  }
+  @keyframes fsb-stripes { to { background-position: 22.6px 0; } }
+  @keyframes fsb-bounce { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-3px) rotate(2deg); } }
+  @keyframes fsb-wave { from { transform: rotate(-10deg); } to { transform: rotate(12deg); } }
+{% endstyle %}
+
+{% schema %}
+  {
+    "name": "Free shipping bar",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Set the threshold in Theme settings > Cart."
+      },
+      {
+        "type": "color",
+        "id": "bar_color",
+        "label": "Bar color"
+      },
+      {
+        "type": "color",
+        "id": "track_color",
+        "label": "Track color"
+      }
+    ]
+  }
+{% endschema %}

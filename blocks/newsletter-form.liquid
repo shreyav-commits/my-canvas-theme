@@ -1,0 +1,60 @@
+{% doc %}
+  Newsletter sign-up using Shopify's customer form. Subscribes the email with the
+  `newsletter` tag and accepts marketing. Shows inline success and error states.
+  Styled for an inverted (ink) surface: input underline and button use the
+  interactive-text color.
+
+  @param {string} [class] - Additional classes for the root element.
+  @param {string} [attributes] - Additional HTML attributes for the root element.
+  @param {string} [form_id] - Unique form id. Default: 'newsletter-form-footer'.
+
+  @category forms
+  @renders div
+
+  @example
+  {% block 'newsletter-form' %}{% endblock %}
+{% enddoc %}
+
+{%- liquid
+  assign form_id = form_id | default: 'newsletter-form-footer'
+  assign input_id = form_id | append: '-email'
+  assign status_id = form_id | append: '-status'
+-%}
+
+<div class="{{ class }}"{% if attributes != blank %} {{ attributes }}{% endif %}>
+  {%- form 'customer', id: form_id, class: 'flex flex-col gap-3' -%}
+    <input type="hidden" name="contact[tags]" value="newsletter">
+    <input type="hidden" name="contact[accepts_marketing]" value="true">
+    <label for="{{ input_id }}" class="sr-only">{{ 'newsletter.email_label' | t }}</label>
+    <div class="flex items-stretch border-b border-interactive-text/60 focus-within:border-interactive-text motion-safe:transition-colors">
+      <input
+        id="{{ input_id }}"
+        type="email"
+        name="contact[email]"
+        required
+        autocomplete="email"
+        placeholder="{{ 'newsletter.placeholder' | t | escape }}"
+        class="flex-1 min-w-0 h-14 bg-transparent text-interactive-text text-base placeholder:text-interactive-text/50 outline-none border-none"
+        {%- if form.errors %} aria-invalid="true"{% endif %}
+        aria-describedby="{{ status_id }}"
+      >
+      <button type="submit" class="inline-flex items-center gap-2 shrink-0 px-2 h-14 text-xs font-medium uppercase tracking-[0.14em] text-interactive-text cursor-pointer hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-text motion-safe:transition-[opacity,transform] motion-safe:active:scale-[0.97]">
+        {{- 'newsletter.submit' | t -}}
+        <span class="inline-flex size-4 rtl:-scale-x-100" aria-hidden="true">{{- 'icon-arrow-right.svg' | inline_asset_content -}}</span>
+      </button>
+    </div>
+    <p id="{{ status_id }}" class="text-xs min-h-4 text-interactive-text/80"{% if form.posted_successfully? or form.errors %} role="status"{% endif %}>
+      {%- if form.posted_successfully? -%}
+        {{ 'newsletter.success' | t }}
+      {%- elsif form.errors -%}
+        {{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}
+      {%- endif -%}
+    </p>
+  {%- endform -%}
+</div>
+
+{% schema %}
+  {
+    "name": "t:blocks.newsletter_form"
+  }
+{% endschema %}

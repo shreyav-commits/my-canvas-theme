@@ -1,0 +1,125 @@
+{% doc %}
+  Shipping protection opt-in for the cart. A switch adds or removes the global
+  `shipping_protection_product` theme setting's first available variant through
+  Standard Actions; the surrounding cart partials then re-render. Render inside
+  a cart partial so the switch reflects the current cart. Self-contained:
+  callers pass an empty body.
+
+  @param {string} [class] - Additional CSS classes on the root element.
+  @param {string} [attributes] - Additional HTML attributes on the root element.
+
+  @category commerce
+  @renders s-shipping-protection
+
+  @example
+  {% block 'shipping-protection', class: 'mb-4' %}{% endblock %}
+{% enddoc %}
+
+{%- liquid
+  assign protection_product = settings.shipping_protection_product
+  assign protection_variant = protection_product.selected_or_first_available_variant
+  assign protection_line = blank
+  for item in cart.items
+    if protection_product != blank and item.product_id == protection_product.id
+      assign protection_line = item
+      break
+    endif
+  endfor
+  assign switch_id = 'shipping-protection-' | append: block.id
+  assign protection_price = protection_variant.price | money
+  assign protection_title = block.settings.title
+  if protection_title == blank
+    assign protection_title = 'cart.protection.title' | t
+  endif
+  assign protection_description = block.settings.description
+  if protection_description == blank
+    assign protection_description = 'cart.protection.description' | t
+  endif
+-%}
+
+{%- if protection_variant != blank and protection_variant.available and cart.item_count > 0 -%}
+<s-shipping-protection
+  class="block{% if class != blank %} {{ class }}{% endif %}"
+  data-variant-id="{{ protection_variant.id }}"
+  data-cart-add-url="{{ routes.cart_add_url }}"
+  {% if protection_line != blank %}data-line-key="{{ protection_line.key | escape }}"{% endif %}
+  {% if attributes != blank %}{{ attributes }}{% endif %}
+>
+  <label for="{{ switch_id }}" class="flex items-center gap-3 rounded-card border border-on-surface/15 bg-surface p-3 cursor-pointer has-[:checked]:border-on-surface motion-safe:transition-colors">
+    <span class="inline-flex shrink-0 size-9 items-center justify-center rounded-full bg-surface-secondary text-on-surface p-2" aria-hidden="true">
+      {{- 'icon-shield.svg' | inline_asset_content -}}
+    </span>
+    <span class="min-w-0 flex-1">
+      <span class="flex items-baseline justify-between gap-2">
+        <span class="text-sm font-semibold text-on-surface">{{ protection_title | escape }}</span>
+        <span class="text-sm font-medium text-on-surface shrink-0"><bdi>{{ protection_price }}</bdi></span>
+      </span>
+      <span class="block text-xs text-on-surface-secondary mt-0.5">{{ protection_description | escape }}</span>
+    </span>
+    <input
+      type="checkbox"
+      role="switch"
+      id="{{ switch_id }}"
+      class="sp-switch shrink-0"
+      aria-label="{{ 'cart.protection.toggle_label' | t: price: protection_price | escape }}"
+      {% if protection_line != blank %}checked{% endif %}
+    >
+  </label>
+  <p data-protection-error role="alert" hidden class="mt-2 text-xs text-sale"></p>
+</s-shipping-protection>
+<script type="module" src="{{ 's-shipping-protection.js' | asset_url }}"></script>
+{%- endif -%}
+
+{% style %}
+  .sp-switch {
+    appearance: none;
+    position: relative;
+    inline-size: 2.75rem;
+    block-size: 1.5rem;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--color-on-surface) 22%, transparent);
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-ui, ease);
+  }
+  .sp-switch::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 3px;
+    inset-inline-start: 3px;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    border-radius: 9999px;
+    background: var(--color-surface);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+    transition: transform 200ms var(--ease-ui, ease);
+  }
+  .sp-switch:checked { background: var(--color-success, var(--color-on-surface)); }
+  .sp-switch:checked::after { transform: translateX(1.25rem); }
+  [dir='rtl'] .sp-switch:checked::after { transform: translateX(-1.25rem); }
+  .sp-switch:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  s-shipping-protection[aria-busy='true'] { opacity: 0.6; pointer-events: none; }
+{% endstyle %}
+
+{% schema %}
+  {
+    "name": "Shipping protection",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Choose the protection product in Theme settings > Cart."
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Title",
+        "info": "Leave blank to use the default: Shipping protection"
+      },
+      {
+        "type": "text",
+        "id": "description",
+        "label": "Description",
+        "info": "Leave blank to use the default text"
+      }
+    ]
+  }
+{% endschema %}

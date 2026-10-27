@@ -8,533 +8,375 @@
  * ------------------------------------------------------------
  */
 {
+  "404": {
+    "title": "404",
+    "title_accessible": "404 — Page not found",
+    "not_found": "Page not found.",
+    "sorry_badge": "Oops, sorry!",
+    "heading": "This piece has left the gallery.",
+    "body": "We’re really sorry. The page you’re looking for has been moved, sold, or never hung here at all. Let’s find you something just as lovely.",
+    "back_to_shopping": "Explore the collection",
+    "back_home": "Back to home",
+    "search_label": "Search the store",
+    "search_placeholder": "Search for frames, prints…",
+    "search_button": "Search",
+    "suggestions_heading": "While you’re here",
+    "recovery_body": "This page couldn’t be found. There’s still plenty to discover."
+  },
   "general": {
-    "password_page": {
-      "login_form_heading": "Enter store using password:",
-      "login_password_button": "Enter using password",
-      "login_form_password_label": "Password",
-      "login_form_password_placeholder": "Your password",
-      "login_form_error": "Wrong password!",
-      "login_form_submit": "Enter",
-      "admin_link_html": "Are you the store owner? <a href=\"/admin\" class=\"link underlined-link\">Log in here</a>",
-      "powered_by_shopify_html": "This shop will be powered by {{ shopify }}"
-    },
-    "social": {
-      "alt_text": {
-        "share_on_facebook": "Share on Facebook",
-        "share_on_twitter": "Share on X",
-        "share_on_pinterest": "Pin on Pinterest"
-      },
-      "links": {
-        "twitter": "X (Twitter)",
-        "facebook": "Facebook",
-        "pinterest": "Pinterest",
-        "instagram": "Instagram",
-        "tumblr": "Tumblr",
-        "snapchat": "Snapchat",
-        "youtube": "YouTube",
-        "vimeo": "Vimeo",
-        "tiktok": "TikTok"
-      }
-    },
-    "continue_shopping": "Continue shopping",
+    "skip_to_content": "Skip to content",
+    "play_video": "Play video",
+    "video_player": "Video player",
+    "captions": "Captions",
+    "clear": "Clear",
+    "back": "Back",
+    "close": "Close",
+    "dismiss": "Dismiss",
+    "drawer": "Drawer",
+    "placeholder_image": "Placeholder image",
+    "account": "Account",
+    "search": "Search",
     "pagination": {
       "label": "Pagination",
+      "previous_page": "Previous page",
+      "next_page": "Next page",
       "page": "Page {{ number }}",
-      "next": "Next page",
-      "previous": "Previous page"
+      "current_page": "Page {{ number }}, current page",
+      "load_more": "Load more",
+      "loading": "Loading",
+      "loaded": "More products loaded"
     },
-    "search": {
-      "search": "Search",
-      "reset": "Clear search term"
-    },
-    "cart": {
-      "view": "View cart ({{ count }})",
-      "view_empty_cart": "View cart",
-      "item_added": "Item added to your cart"
-    },
-    "share": {
-      "close": "Close share",
-      "copy_to_clipboard": "Copy link",
-      "share_url": "Link",
-      "success_message": "Link copied to clipboard"
-    },
-    "slider": {
-      "of": "of",
-      "next_slide": "Slide right",
-      "previous_slide": "Slide left",
-      "name": "Slider"
+    "meta": {
+      "tagged": "tagged \"{{ tags }}\"",
+      "page": "Page {{ number }}"
     }
-  },
-  "newsletter": {
-    "label": "Email",
-    "success": "Thanks for subscribing",
-    "button_label": "Subscribe"
   },
   "accessibility": {
-    "skip_to_text": "Skip to content",
-    "skip_to_product_info": "Skip to product information",
-    "close": "Close",
-    "unit_price_separator": "per",
-    "vendor": "Vendor:",
-    "error": "Error",
-    "refresh_page": "Choosing a selection results in a full page refresh.",
-    "link_messages": {
-      "new_window": "Opens in a new window.",
-      "external": "Opens external website."
+    "comparison_slider": "Drag to compare images",
+    "results_updated": "Results updated",
+    "variant_updated": "Selection updated",
+    "update_error": "An error occurred. Please try again."
+  },
+  "blog": {
+    "articles_heading": "Articles",
+    "article_metadata_html": "<time datetime=\"{{ datetime }}\">{{ date }}</time> · {{ author }}",
+    "article_metadata_no_author_html": "<time datetime=\"{{ datetime }}\">{{ date }}</time>",
+    "comment_form_body": "Comment",
+    "comment_form_email": "Email",
+    "comment_form_name": "Name",
+    "comment_form_submit": "Post",
+    "comment_form_title": "Add a comment",
+    "comments_count": {
+      "one": "1 comment",
+      "other": "{{ count }} comments"
     },
-    "loading": "Loading...",
-    "total_reviews": "total reviews",
-    "star_reviews_info": "{{ rating_value }} out of {{ rating_max }} stars",
-    "collapsible_content_title": "Collapsible content",
-    "complementary_products": "Complementary products"
+    "no_articles": "No articles yet."
   },
-  "blogs": {
-    "article": {
-      "blog": "Blog",
-      "read_more_title": "Read more: {{ title }}",
-      "comments": {
-        "one": "{{ count }} comment",
-        "other": "{{ count }} comments"
-      },
-      "moderated": "Please note, comments need to be approved before they are published.",
-      "comment_form_title": "Leave a comment",
-      "name": "Name",
-      "email": "Email",
-      "message": "Comment",
-      "post": "Post comment",
-      "back_to_blog": "Back to blog",
-      "share": "Share this article",
-      "success": "Your comment was posted successfully! Thank you!",
-      "success_moderated": "Your comment was posted successfully. We will publish it in a little while, as our blog is moderated."
-    }
+  "cart": {
+    "upsell_heading": "Complete the wall",
+    "free_shipping": {
+      "progress_html": "You're <strong>{{ amount }}</strong> away from <strong>free shipping</strong>!",
+      "success_html": "Woohoo! You've unlocked <strong>free shipping</strong> 🎉",
+      "progress_label": "Progress toward free shipping"
+    },
+    "protection": {
+      "title": "Shipping protection",
+      "description": "Cover your order against loss, theft and damage in transit.",
+      "toggle_label": "Add shipping protection for {{ price }}"
+    },
+    "checkout": "Checkout",
+    "title": "Cart",
+    "remove": "Remove: {{ title }}",
+    "empty": "Your cart is empty.",
+    "empty_description": "Looks like you haven't added anything to your cart yet.",
+    "icon_label": {
+      "one": "Cart (1 item)",
+      "other": "Cart ({{ count }} items)"
+    },
+    "item_count": {
+      "one": "1 item in cart",
+      "other": "{{ count }} items in cart"
+    },
+    "item_removed": "Item removed from cart",
+    "updated": "Cart updated",
+    "note_label": "Order notes",
+    "note_placeholder": "Add special instructions for your order",
+    "taxes_and_shipping_at_checkout": "Taxes and shipping calculated at checkout",
+    "discount_list": "Applied discounts",
+    "discount_savings": "(-{{ amount }})",
+    "discount_code": "Discount code",
+    "discount_title": "Discount: {{ title }}",
+    "update_error": "Could not update cart. Please try again.",
+    "refresh_error": "Cart updated, but the display may be out of date. Refresh the page to see the latest cart.",
+    "continue_shopping": "Continue shopping",
+    "checkout_description": "Proceeds to secure checkout",
+    "discount_placeholder": "Enter code",
+    "discount_apply": "Apply",
+    "note_accordion_label": "Special instructions",
+    "total_label": "Estimated total"
   },
-  "onboarding": {
-    "product_title": "Example product title",
-    "collection_title": "Your collection's name"
+  "contact": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "message": "Message",
+    "submit": "Send message",
+    "success": "Thank you for reaching out. We'll be in touch soon.",
+    "success_heading": "Message received.",
+    "heading": "Let's talk about your walls.",
+    "intro": "Questions about a print, framing advice or a commission? Send us a note and a real person will reply.",
+    "email_us": "Email",
+    "response_label": "Response time",
+    "response_value": "Within one business day",
+    "studio_label": "Studio",
+    "topic_label": "What is it about?",
+    "topic_general": "General question",
+    "topic_order": "An order",
+    "topic_framing": "Framing advice",
+    "topic_commission": "Commission",
+    "form_heading": "Send a message"
+  },
+  "collections": {
+    "all_collections": "All collections",
+    "view_label": "View",
+    "view_grid": "Grid view",
+    "view_list": "List view",
+    "per_page_label": "Show",
+    "per_page_option": "{{ count }} per page",
+    "per_page_updated": "Showing {{ count }} products per page",
+    "browse_heading": "Browse collections",
+    "products_heading": "Products",
+    "placeholder_title": "Collection title",
+    "no_collections": "No collections found.",
+    "no_products": "No products found.",
+    "products_count": {
+      "one": "1 product",
+      "other": "{{ count }} products"
+    },
+    "filter": "Filter",
+    "filters": "Filters",
+    "active_filters": "Active filters",
+    "clear_all": "Clear all",
+    "remove_filter": "Remove {{ filter }}",
+    "show_results": "Show results",
+    "value_unavailable": "Unavailable",
+    "price_min": "Min price",
+    "price_max": "Max price",
+    "price_to": "to",
+    "sort_by": "Sort by",
+    "filtering": {
+      "show_more": "Show more"
+    },
+    "view_all": "View all"
+  },
+  "header": {
+    "menu": "Menu",
+    "mobile_navigation": "Mobile navigation",
+    "navigation": "Main navigation",
+    "view_all": "View all {{ title }}",
+    "show_submenu": "Show submenu for {{ title }}"
+  },
+  "footer": {
+    "quick_links": "Quick links",
+    "policies": "Policies"
+  },
+  "gift_card": {
+    "add_to_apple_wallet": "Add to Apple Wallet",
+    "card": "Gift card",
+    "expired": "This gift card has expired",
+    "expires_on": "Expires on {{ expires_on }}",
+    "use_at_checkout": "Use this gift card at checkout",
+    "a_gift_for_you": "A gift for you",
+    "available": "{{ amount }} available",
+    "a_little_something": "A little something for you",
+    "card_label": "{{ shop }} gift card",
+    "copy_code": "Copy code",
+    "copied": "Code copied",
+    "copy_error": "Couldn’t copy automatically. Copy the code manually.",
+    "disabled": "This gift card is no longer valid",
+    "start_shopping": "Start shopping"
+  },
+  "page": {
+    "content_heading": "Page content"
+  },
+  "password": {
+    "title": "This shop is private",
+    "eyebrow": "Opening soon",
+    "launch_description": "Get an early look at what's next.",
+    "enter": "Enter",
+    "enter_with_password": "Enter with password",
+    "enter_store": "Enter store",
+    "show": "Show",
+    "hide": "Hide",
+    "error": "Incorrect password. Please try again.",
+    "field_label": "Password",
+    "placeholder": "Enter password",
+    "get_updates": "Get opening updates",
+    "updates_description": "Be the first to know when we open.",
+    "updates_submit": "Notify me",
+    "updates_success": "Thanks for subscribing."
+  },
+  "product": {
+    "details": "Product details",
+    "placeholder_title": "Product title",
+    "quantity": "Quantity",
+    "quantity_decrease": "Decrease quantity: {{ title }}",
+    "quantity_increase": "Increase quantity: {{ title }}",
+    "quantity_input": "Quantity for {{ title }}",
+    "add_to_cart": "Add to cart",
+    "added_to_cart": "Added to cart",
+    "upsell_heading": "Pairs well with",
+    "sale_badge": "-{{ percent }}%",
+    "badge_sale": "Sale",
+    "badge_sale_percent": "Sale -{{ percent }}%",
+    "badge_best_seller": "Best seller",
+    "badge_preorder": "Pre-order",
+    "preorder_button": "Pre-order now",
+    "preorder_note": "Available to pre-order. Ships as soon as it is ready.",
+    "save_amount": "You save {{ amount }}",
+    "only_left": "Only {{ count }} left. Selling fast!",
+    "in_stock": "In stock, ready to ship",
+    "free_shipping_over": "Free shipping on orders over {{ amount }}",
+    "trust_secure": "Secure checkout",
+    "trust_returns": "Easy returns",
+    "trust_delivery": "Fast delivery",
+    "you_may_also_like": "You may also like",
+    "recently_viewed": "Recently viewed",
+    "upsell_add": "Add",
+    "upsell_add_label": "Add {{ title }} to cart",
+    "sold_out": "Sold out",
+    "select_option": "Select {{ name }}",
+    "option_sold_out": "(sold out)",
+    "select_options_button": "Select options",
+    "fbt_heading": "Frequently bought together",
+    "fbt_this_item": "This item:",
+    "fbt_total": "Total price",
+    "fbt_add": "Add selected to cart",
+    "fbt_select_options": "Please choose this item's options above first.",
+    "breadcrumb_label": "Breadcrumb",
+    "breadcrumb_home": "Home",
+    "shipping_heading": "Shipping & returns",
+    "shipping_body": "Every piece is carefully packed and dispatched within 3 to 5 working days, with tracking on every order. Not quite right? Returns are accepted within 14 days of delivery in original condition.",
+    "care_heading": "Care & framing",
+    "care_body": "Hang away from direct sunlight and damp walls to keep colours true. Dust gently with a soft, dry cloth. Prints are produced on archival paper for lasting quality.",
+    "description": "Description",
+    "view_image": "View image: {{ title }}",
+    "image_zoom": "Expanded product image"
   },
   "products": {
-    "product": {
-      "add_to_cart": "Add to cart",
-      "choose_options": "Choose options",
-      "choose_product_options": "Choose options for {{ product_name }}",
-      "description": "Description",
-      "inventory_in_stock": "In stock",
-      "inventory_in_stock_show_count": "{{ quantity }} in stock",
-      "inventory_low_stock": "Low stock",
-      "inventory_low_stock_show_count": "Low stock: {{ quantity }} left",
-      "inventory_out_of_stock": "Out of stock",
-      "inventory_out_of_stock_continue_selling": "In stock",
-      "sku": "SKU",
-      "on_sale": "Sale",
-      "product_variants": "Product variants",
-      "media": {
-        "gallery_viewer": "Gallery Viewer",
-        "load_image": "Load image {{ index }} in gallery view",
-        "load_model": "Load 3D Model {{ index }} in gallery view",
-        "load_video": "Play video {{ index }} in gallery view",
-        "image_available": "Image {{ index }} is now available in gallery view",
-        "open_media": "Open media {{ index }} in modal",
-        "play_model": "Play 3D Viewer",
-        "play_video": "Play video"
-      },
-      "nested_label": "{{ title }} for {{ parent_title }}",
-      "quantity": {
-        "label": "Quantity",
-        "input_label": "Quantity for {{ product }}",
-        "increase": "Increase quantity for {{ product }}",
-        "decrease": "Decrease quantity for {{ product }}",
-        "minimum_of": "Minimum of {{ quantity }}",
-        "maximum_of": "Maximum of {{ quantity }}",
-        "multiples_of": "Increments of {{ quantity }}",
-        "min_of": "Min {{ quantity }}",
-        "max_of": "Max {{ quantity }}",
-        "in_cart_html": "<span class=\"quantity-cart\">{{ quantity }}</span> in cart",
-        "in_cart_aria_label": "Quantity ({{ quantity }} in cart)",
-        "note": "View quantity rules"
-      },
-      "volume_pricing": {
-        "title": "Volume Pricing",
-        "note": "Volume pricing available",
-        "minimum": "{{ quantity }}+",
-        "price_at_each_html": "at {{ price }}/ea",
-        "price_range": "{{ minimum }} - {{ maximum }}"
-      },
-      "pickup_availability": {
-        "view_store_info": "View store information",
-        "check_other_stores": "Check availability at other stores",
-        "pick_up_available": "Pickup available",
-        "pick_up_available_at_html": "Pickup available at <span class=\"color-foreground\">{{ location_name }}</span>",
-        "pick_up_unavailable_at_html": "Pickup currently unavailable at <span class=\"color-foreground\">{{ location_name }}</span>",
-        "unavailable": "Couldn't load pickup availability",
-        "refresh": "Refresh"
-      },
-      "price": {
-        "from_price_html": "From {{ price }}",
-        "regular_price": "Regular price",
-        "sale_price": "Sale price",
-        "unit_price": "Unit price"
-      },
-      "share": "Share this product",
-      "sold_out": "Sold out",
-      "unavailable": "Unavailable",
-      "vendor": "Vendor",
-      "value_unavailable": "{{ option_value }} - Unavailable",
-      "variant_sold_out_or_unavailable": "Variant sold out or unavailable",
-      "video_exit_message": "{{ title }} opens full screen video in same window.",
-      "view_full_details": "View full details",
-      "xr_button": "View in your space",
-      "xr_button_label": "View in your space, loads item in augmented reality window",
-      "taxes_included": "Taxes included.",
-      "duties_included": "Duties included.",
-      "duties_and_taxes_included": "Duties and taxes included.",
-      "shipping_policy_html": "<a href=\"{{ link }}\">Shipping</a> calculated at checkout."
+    "price": {
+      "price": "Price",
+      "price_range_html": "{{ min }} – {{ max }}",
+      "price_range_label": "Price range",
+      "regular_price": "Regular price",
+      "sale_price": "Sale price",
+      "savings": "Save {{ amount }}"
     },
-    "modal": {
-      "label": "Media gallery"
-    },
-    "facets": {
-      "filter_and_operator_subtitle": "Match all",
-      "apply": "Apply",
-      "clear": "Clear",
-      "clear_all": "Remove all",
-      "from": "From",
-      "filter_and_sort": "Filter and sort",
-      "filter_by_label": "Filter:",
-      "filter_button": "Filter",
-      "filters_selected": {
-        "one": "{{ count }} selected",
-        "other": "{{ count }} selected"
-      },
-      "filter_selected_accessibility": "{{ type }} ({{ count }} filters selected)",
-      "show_more": "Show more",
-      "show_less": "Show less",
-      "max_price": "The highest price is {{ price }}",
-      "product_count": {
-        "one": "{{ product_count }} of {{ count }} product",
-        "other": "{{ product_count }} of {{ count }} products"
-      },
-      "product_count_simple": {
-        "one": "{{ count }} product",
-        "other": "{{ count }} products"
-      },
-      "reset": "Reset",
-      "sort_button": "Sort",
-      "sort_by_label": "Sort by:",
-      "to": "To",
-      "clear_filter": "Remove filter"
+    "quantity": {
+      "decrease": "Decrease quantity",
+      "increase": "Increase quantity",
+      "input_label": "Quantity"
     }
   },
-  "templates": {
-    "404": {
-      "title": "Page not found",
-      "subtext": "404"
-    },
-    "search": {
-      "no_results": "No results found for “{{ terms }}”. Check the spelling or use a different word or phrase.",
-      "page": "Page",
-      "products": "Products",
-      "results_pages_with_count": {
-        "one": "{{ count }} page",
-        "other": "{{ count }} pages"
-      },
-      "results_suggestions_with_count": {
-        "one": "{{ count }} suggestion",
-        "other": "{{ count }} suggestions"
-      },
-      "results_products_with_count": {
-        "one": "{{ count }} product",
-        "other": "{{ count }} products"
-      },
-      "results_with_count": {
-        "one": "{{ count }} result",
-        "other": "{{ count }} results"
-      },
-      "results_with_count_and_term": {
-        "one": "{{ count }} result found for “{{ terms }}”",
-        "other": "{{ count }} results found for “{{ terms }}”"
-      },
-      "title": "Search results",
-      "search_for": "Search for “{{ terms }}”",
-      "suggestions": "Suggestions",
-      "pages": "Pages"
-    },
-    "cart": {
-      "cart": "Cart"
-    },
-    "contact": {
-      "form": {
-        "title": "Contact form",
-        "name": "Name",
-        "email": "Email",
-        "phone": "Phone number",
-        "comment": "Comment",
-        "send": "Send",
-        "post_success": "Thanks for contacting us. We'll get back to you as soon as possible.",
-        "error_heading": "Please adjust the following:"
-      }
+  "filters": {
+    "active_count": {
+      "one": "1 active filter",
+      "other": "{{ count }} active filters"
     }
   },
-  "sections": {
-    "announcements": {
-      "previous_announcement": "Previous announcement",
-      "next_announcement": "Next announcement",
-      "carousel": "Carousel",
-      "announcement": "Announcement",
-      "announcement_bar": "Announcement bar"
+  "forms": {
+    "required": "required",
+    "form_errors_title": "Please fix the following errors:"
+  },
+  "search": {
+    "title": "Search",
+    "label": "Search",
+    "placeholder": "Search",
+    "products_heading": "Products",
+    "results_heading": "Search results",
+    "view_all_results": "View all results",
+    "results_count_announcement": {
+      "one": "1 result available",
+      "other": "{{ count }} results available"
     },
-    "header": {
-      "announcement": "Announcement",
-      "menu": "Menu",
-      "cart_count": {
-        "one": "{{ count }} item",
-        "other": "{{ count }} items"
-      }
+    "no_results_announcement": "No results found for {{ terms }}",
+    "results_for": "{{ count }} results found for {{ terms }}",
+    "no_results": "No results found for {{ terms }}",
+    "live_results_announcement": {
+      "one": "{{ count }} result found for {{ terms }}",
+      "other": "{{ count }} results found for {{ terms }}"
     },
-    "cart": {
-      "title": "Your cart",
-      "caption": "Cart items",
-      "remove_title": "Remove {{ title }}",
-      "estimated_total": "Estimated total",
-      "new_estimated_total": "New estimated total",
-      "note": "Order special instructions",
-      "checkout": "Check out",
-      "drawer_checkout": "Checkout",
-      "empty": "Your cart is empty",
-      "cart_error": "There was an error while updating your cart. Please try again.",
-      "cart_quantity_error_html": "You can only add {{ quantity }} of this item to your cart.",
-      "duties_and_taxes_included_shipping_at_checkout_with_policy_html": "Duties and taxes included. Discounts and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
-      "duties_and_taxes_included_shipping_at_checkout_without_policy": "Duties and taxes included. Discounts and shipping calculated at checkout.",
-      "taxes_included_shipping_at_checkout_with_policy_html": "Taxes included. Discounts and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
-      "taxes_included_shipping_at_checkout_without_policy": "Taxes included. Discounts and shipping calculated at checkout.",
-      "duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html": "Duties included. Taxes, discounts and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
-      "duties_included_taxes_at_checkout_shipping_at_checkout_without_policy": "Duties included. Taxes, discounts and shipping calculated at checkout.",
-      "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Taxes, discounts and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
-      "taxes_at_checkout_shipping_at_checkout_without_policy": "Taxes, discounts and shipping calculated at checkout.",
-      "headings": {
-        "product": "Product",
-        "price": "Price",
-        "total": "Total",
-        "quantity": "Quantity",
-        "image": "Product image"
-      },
-      "update": "Update",
-      "login": {
-        "title": "Have an account?",
-        "paragraph_html": "<a href=\"{{ link }}\" class=\"link underlined-link\">Log in</a> to check out faster."
-      }
-    },
-    "footer": {
-      "payment": "Payment methods"
-    },
-    "featured_blog": {
-      "view_all": "View all",
-      "onboarding_title": "Blog post",
-      "onboarding_content": "Give your customers a summary of your blog post"
-    },
-    "featured_collection": {
-      "view_all": "View all",
-      "view_all_label": "View all products in the {{ collection_name }} collection"
-    },
-    "collection_list": {
-      "view_all": "View all"
-    },
-    "collection_template": {
-      "empty": "No products found",
-      "title": "Collection",
-      "use_fewer_filters_html": "Use fewer filters or <a class=\"{{ class }}\" href=\"{{ link }}\">remove all</a>"
-    },
-    "video": {
-      "load_video": "Load video: {{ description }}"
-    },
-    "slideshow": {
-      "load_slide": "Load slide",
-      "previous_slideshow": "Previous slide",
-      "next_slideshow": "Next slide",
-      "pause_slideshow": "Pause slideshow",
-      "play_slideshow": "Play slideshow",
-      "carousel": "Carousel",
-      "slide": "Slide"
-    },
-    "page": {
-      "title": "Page title"
-    },
-    "quick_order_list": {
-      "product_total": "Product subtotal",
-      "view_cart": "View cart",
-      "each": "{{ money }}/ea",
-      "product": "Product",
-      "variant": "Variant",
-      "variant_total": "Variant total",
-      "items_added": {
-        "one": "{{ quantity }} item added",
-        "other": "{{ quantity }} items added"
-      },
-      "items_removed": {
-        "one": "{{ quantity }} item removed",
-        "other": "{{ quantity }} items removed"
-      },
-      "product_variants": "Product variants",
-      "total_items": "Total items",
-      "remove_all_single_item_confirmation": "Remove 1 item from your cart?",
-      "remove_all_items_confirmation": "Remove all {{ quantity }} items from your cart?",
-      "remove_all": "Remove all",
-      "cancel": "Cancel",
-      "min_error": "This item has a minimum of {{ min }}",
-      "max_error": "This item has a maximum of {{ max }}",
-      "step_error": "You can only add this item in increments of {{ step }}"
-    }
+    "live_no_results_announcement": "No results found for {{ terms }}"
   },
   "localization": {
-    "country_label": "Country/region",
-    "language_label": "Language",
-    "update_language": "Update language",
-    "update_country": "Update country/region",
-    "search": "Search",
-    "popular_countries_regions": "Popular countries/regions",
-    "country_results_count": "{{ count }} countries/regions found"
+    "form_label": "Region and language",
+    "language": "Language",
+    "country_region_currency": "Country/region and currency",
+    "update_language": "Update"
   },
-  "customer": {
-    "account": {
-      "title": "Account",
-      "details": "Account details",
-      "view_addresses": "View addresses",
-      "return": "Return to Account details"
+  "home": {
+    "marquee": {
+      "item_one": "Made to order",
+      "item_two": "Museum-grade paper",
+      "item_three": "Small signed editions",
+      "item_four": "Framing advice, free"
     },
-    "account_fallback": "Account",
-    "activate_account": {
-      "title": "Activate account",
-      "subtext": "Create your password to activate your account.",
-      "password": "Password",
-      "password_confirm": "Confirm password",
-      "submit": "Activate account",
-      "cancel": "Decline invitation"
+    "hero": {
+      "title": "New arrivals",
+      "subtitle": "Explore the collection",
+      "eyebrow": "New editions just landed",
+      "heading": "Quiet walls, lasting impressions",
+      "body": "Fine art prints and framed works, made to order in small editions.",
+      "cta": "View the collection"
     },
-    "addresses": {
-      "title": "Addresses",
-      "default": "Default",
-      "add_new": "Add a new address",
-      "edit_address": "Edit address",
-      "first_name": "First name",
-      "last_name": "Last name",
-      "company": "Company",
-      "address1": "Address 1",
-      "address2": "Address 2",
-      "city": "City",
-      "country": "Country/region",
-      "province": "Province",
-      "zip": "Postal/ZIP code",
-      "phone": "Phone",
-      "set_default": "Set as default address",
-      "add": "Add address",
-      "update": "Update address",
-      "cancel": "Cancel",
-      "edit": "Edit",
-      "delete": "Delete",
-      "delete_confirm": "Are you sure you wish to delete this address?"
+    "edit": {
+      "heading": "Art chosen the way a curator would choose it",
+      "body": "Every piece in the collection is selected for how it lives on a wall: the light it holds, the stillness it brings to a room, the conversation it starts. Nothing is mass-produced. Each print is made only once you order it.",
+      "link": "Browse all works",
+      "caption_one": "Desert study, black frame",
+      "caption_two": "Low tide, graphite frame"
     },
-    "log_in": "Log in",
-    "log_out": "Log out",
-    "login_page": {
-      "cancel": "Cancel",
-      "create_account": "Create account",
-      "email": "Email",
-      "forgot_password": "Forgot your password?",
-      "guest_continue": "Continue",
-      "guest_title": "Continue as a guest",
-      "password": "Password",
-      "title": "Login",
-      "sign_in": "Sign in",
-      "submit": "Submit",
-      "alternate_provider_separator": "or"
+    "featured": {
+      "heading": "On the wall now"
     },
-    "order": {
-      "title": "Order {{ name }}",
-      "date_html": "Placed on {{ date }}",
-      "cancelled_html": "Order Cancelled on {{ date }}",
-      "cancelled_reason": "Reason: {{ reason }}",
-      "billing_address": "Billing Address",
-      "payment_status": "Payment Status",
-      "shipping_address": "Shipping Address",
-      "fulfillment_status": "Fulfillment Status",
-      "discount": "Discount",
-      "shipping": "Shipping",
-      "tax": "Tax",
-      "product": "Product",
-      "sku": "SKU",
-      "price": "Price",
-      "quantity": "Quantity",
-      "total": "Total",
-      "total_refunded": "Refunded",
-      "fulfilled_at_html": "Fulfilled {{ date }}",
-      "track_shipment": "Track shipment",
-      "tracking_url": "Tracking link",
-      "tracking_company": "Carrier",
-      "tracking_number": "Tracking number",
-      "subtotal": "Subtotal",
-      "total_duties": "Duties"
+    "compare": {
+      "heading": "The difference a mat makes",
+      "body": "Drag across the piece to see the same work hung bare and finished with a gallery mat. A mat gives the artwork room to breathe and draws the eye inward.",
+      "before_label": "Without mat",
+      "after_label": "With mat",
+      "cta": "Choose your finish"
     },
-    "orders": {
-      "title": "Order history",
-      "order_number": "Order",
-      "order_number_link": "Order number {{ number }}",
-      "date": "Date",
-      "payment_status": "Payment status",
-      "fulfillment_status": "Fulfillment status",
-      "total": "Total",
-      "none": "You haven't placed any orders yet."
-    },
-    "recover_password": {
-      "title": "Reset your password",
-      "subtext": "We will send you an email to reset your password",
-      "success": "We've sent you an email with a link to update your password."
-    },
-    "register": {
-      "title": "Create account",
-      "first_name": "First name",
-      "last_name": "Last name",
-      "email": "Email",
-      "password": "Password",
-      "submit": "Create"
-    },
-    "reset_password": {
-      "title": "Reset account password",
-      "subtext": "Enter a new password",
-      "password": "Password",
-      "password_confirm": "Confirm password",
-      "submit": "Reset password"
+    "craft": {
+      "heading": "Made with museum-grade care",
+      "paper_title": "Archival paper",
+      "paper_body": "Thick matte stock with a smooth, glare-free finish that holds deep blacks and soft tones.",
+      "print_title": "Twelve-color giclée",
+      "print_body": "Fine art printing renders colour and grayscale with depth far beyond standard inkjet.",
+      "edition_title": "Signed editions",
+      "edition_body": "Limited runs of 1 to 100, each completed by hand and shipped with a certificate of authenticity.",
+      "cta": "Find your piece"
     }
   },
-  "gift_cards": {
-    "issued": {
-      "how_to_use_gift_card": "Use the gift card code online or QR code in-store",
-      "title": "Here's your {{ value }} gift card balance for {{ shop }}!",
-      "subtext": "Your gift card",
-      "gift_card_code": "Gift card code",
-      "shop_link": "Visit online store",
-      "add_to_apple_wallet": "Add to Apple Wallet",
-      "qr_image_alt": "QR code — scan to redeem gift card",
-      "copy_code": "Copy gift card code",
-      "expiration_date": "Expires {{ expires_on }}",
-      "copy_code_success": "Code copied successfully",
-      "expired": "Expired"
-    }
+  "footer_signoff": {
+    "heading": "Bring the gallery home.",
+    "body": "Fine art prints and framed works, made to order.",
+    "newsletter_heading": "Join the private view",
+    "newsletter_body": "New editions, studio notes and early access to limited runs. Quietly, once a month.",
+    "column_shop": "Shop",
+    "column_help": "Help",
+    "column_info": "Information"
   },
-  "recipient": {
-    "form": {
-      "checkbox": "I want to send this as a gift",
-      "expanded": "Gift card recipient form expanded",
-      "collapsed": "Gift card recipient form collapsed",
-      "email_label": "Recipient email",
-      "email_label_optional_for_no_js_behavior": "Recipient email (optional)",
-      "email": "Email",
-      "name_label": "Recipient name (optional)",
-      "name": "Name",
-      "message_label": "Message (optional)",
-      "message": "Message",
-      "max_characters": "{{ max_chars }} characters max",
-      "send_on": "YYYY-MM-DD",
-      "send_on_label": "Send on (optional)"
+  "newsletter": {
+    "email_label": "Email address",
+    "placeholder": "Your email address",
+    "submit": "Subscribe",
+    "success": "Thank you. You're on the list."
+  },
+  "shopify_library": {
+    "carousel": {
+      "label": "Carousel",
+      "previous": "Previous",
+      "next": "Next"
     }
   },
   "pagefly": {
