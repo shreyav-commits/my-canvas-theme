@@ -1,132 +1,438 @@
-{% doc %}
-  Renders a product price block, handling sale prices, compare-at prices,
-  savings percentages, and price ranges. Uses semantic color tokens so sale
-  prices are visually distinct from regular prices.
-
-  @param {number} price - Current price in cents (e.g. variant.price). @required
-  @param {number} [compare_at_price] - Original/compare-at price in cents. When greater than price, the item is considered on sale.
-  @param {number} [price_min] - Minimum price for product ranges (e.g. product.price_min).
-  @param {number} [price_max] - Maximum price for product ranges (e.g. product.price_max).
-  @param {boolean} [show_currency] - When true, uses the money_with_currency filter. Default: false.
-  @param {string} [class] - Additional CSS classes to append to the root element. Weight follows the variant, so pass `font-medium` here when the composition wants an emphasized price.
-  @param {string} [attributes] - Additional HTML attributes passed through to the root element.
-
-  @category commerce
-  @renders div
-
-  @example
-  {% block 'price', price: variant.price %}{% endblock %}
-  {% block 'price', price: variant.price, compare_at_price: variant.compare_at_price %}{% endblock %}
-  {% block 'price', price: variant.price, price_min: product.price_min, price_max: product.price_max %}{% endblock %}
-  {% block 'price', price: variant.price, compare_at_price: variant.compare_at_price, show_currency: true %}{% endblock %}
-  {% block 'price', price: variant.price, variant: 'type-heading-sm', class: 'font-medium' %}{% endblock %}
-{% enddoc %}
+{% # import schema from '../schemas/blocks/price.js' %}
 
 {%- liquid
-  assign show_currency = show_currency | default: false
-  assign variant       = variant | default: 'type-body'
-  assign color         = color
-
-  assign price_style = ''
-  if color != blank
-    assign price_style = 'color: ' | append: color
-  endif
-
-  assign is_range = false
-  if price_min != blank and price_max != blank and price_min != price_max
-    assign is_range = true
-  endif
-
-  assign on_sale = false
-  if compare_at_price != blank and compare_at_price > price
-    assign on_sale = true
-  endif
-
-  if is_range
-    if show_currency
-      assign min_formatted = price_min | money_with_currency
-      assign max_formatted = price_max | money_with_currency
-    else
-      assign min_formatted = price_min | money
-      assign max_formatted = price_max | money
-    endif
-  elsif on_sale
-    if show_currency
-      assign price_formatted          = price | money_with_currency
-      assign compare_at_price_formatted = compare_at_price | money_with_currency
-    else
-      assign price_formatted          = price | money
-      assign compare_at_price_formatted = compare_at_price | money
-    endif
-    assign savings         = compare_at_price | minus: price
-    assign savings_percent = savings | times: 100.0 | divided_by: compare_at_price | round
-  else
-    if show_currency
-      assign price_formatted = price | money_with_currency
-    else
-      assign price_formatted = price | money
-    endif
-  endif
+  assign product_resource = closest.product
+  assign selected_variant = product_resource.selected_or_first_available_variant
 -%}
 
-{%- comment -%} No hardcoded weight inside: the variant (or a caller `font-medium`) owns font-weight so a given text style matches the text block.
-  Each formatted amount sits in <bdi> so the bidi algorithm cannot reorder currency symbols, minus signs or range separators inside RTL text; a no-op in LTR. {%- endcomment -%}
-<div class="{{ variant }} inline-flex items-baseline gap-2 flex-wrap{% if class %} {{ class }}{% endif %}"{% if attributes != blank %} {{ attributes }}{% endif %}>
-  {%- if is_range -%}
-    <span class="text-on-surface"{% if price_style != blank %} style="{{ price_style }}"{% endif %}>
-      <span class="sr-only">{{ 'products.price.price_range_label' | t }}: </span>
-      {%- capture range_text -%}{{ 'products.price.price_range_html' | t: min: min_formatted, max: max_formatted }}{%- endcapture -%}
-      <bdi>{{ range_text }}</bdi>
-    </span>
-  {%- elsif on_sale -%}
-    <span class="text-sale"{% if price_style != blank %} style="{{ price_style }}"{% endif %}>
-      <span class="sr-only">{{ 'products.price.sale_price' | t }}: </span>
-      <bdi>{{ price_formatted }}</bdi>
-    </span>
-    {%- comment -%} <s> (strikethrough) is the correct semantic element for the original price; the color setting intentionally overrides compare-at color with the rest of the price. {%- endcomment -%}
-    <s class="text-compare text-sm"{% if price_style != blank %} style="{{ price_style }}"{% endif %}>
-      <span class="sr-only">{{ 'products.price.regular_price' | t }}: </span>
-      <bdi>{{ compare_at_price_formatted }}</bdi>
-    </s>
-    {%- capture savings_percent_label %}{{ savings_percent }}%{%- endcapture -%}
-    <span class="text-sale text-sm"{% if price_style != blank %} style="{{ price_style }}"{% endif %}>
-      <span class="sr-only">{{ 'products.price.savings' | t: amount: savings_percent_label }}</span>
-      <bdi aria-hidden="true">(-{{ savings_percent }}%)</bdi>
-    </span>
-  {%- else -%}
-    <span class="text-on-surface"{% if price_style != blank %} style="{{ price_style }}"{% endif %}>
-      <span class="sr-only">{{ 'products.price.price' | t }}: </span>
-      <bdi>{{ price_formatted }}</bdi>
-    </span>
+{% liquid
+  if block.settings.type_preset == 'rte' or block.settings.type_preset == 'paragraph'
+    assign is_rte = true
+  endif
+
+  capture text_block_classes
+    if block.settings.width == '100%'
+      echo 'text-block--align-' | append: block.settings.alignment
+      if block.settings.max_width == 'none'
+        echo ' text-block--full-width'
+      endif
+    endif
+    if block.settings.type_preset == 'custom'
+      echo ' custom-typography'
+      if block.settings.font_size != ''
+        echo ' custom-font-size'
+      endif
+      if block.settings.color != ''
+        echo ' custom-color'
+      endif
+    endif
+    if block.settings.background
+      echo ' text-block--background'
+    endif
+    if is_rte
+      echo ' rte'
+    endif
+  endcapture
+%}
+
+<product-price
+  class="text-block {{ text_block_classes }} text-{{ block.settings.alignment }} {{ block.settings.type_preset | default: 'paragraph' }} spacing-style{% if closest.product == blank and request.design_mode == false %} hidden{% endif %}"
+  data-block-id="{{ block.id }}"
+  data-product-id="{{ product_resource.id }}"
+  style="
+    {% render 'typography-style', settings: block.settings %}
+    {% render 'spacing-style', settings: block.settings %}
+    --width: {{ block.settings.width }};
+  "
+  {{ block.shopify_attributes }}
+>
+  {% render 'price',
+    show_unit_price: true,
+    product_resource: product_resource,
+    show_sale_price_first: block.settings.show_sale_price_first
+  %}
+
+  {% if block.settings.show_tax_info %}
+    <div class="tax-note">
+      {%- if cart.duties_included and cart.taxes_included -%}
+        {{ 'content.duties_and_taxes_included' | t }}
+      {%- elsif cart.taxes_included -%}
+        {{ 'content.taxes_included' | t }}
+      {%- elsif cart.duties_included -%}
+        {{ 'content.duties_included' | t }}
+      {%- endif -%}
+
+      {%- if shop.shipping_policy.body != blank -%}
+        {{ 'content.shipping_policy' | t }}
+      {%- endif -%}
+    </div>
+  {% endif %}
+
+  {%- if selected_variant != blank and block.settings.show_installments -%}
+    <div class="installments">
+      {%- assign product_form_installment_id = 'product-form-installment-' | append: block.id -%}
+      {%- form 'product', product_resource, id: product_form_installment_id, class: 'payment-terms' -%}
+        <input
+          type="hidden"
+          name="id"
+          value="{{ selected_variant.id }}"
+        >
+        {{ form | payment_terms }}
+      {%- endform -%}
+    </div>
   {%- endif -%}
-</div>
+</product-price>
+
+{% # theme-check-disable %}
+{% stylesheet %}
+  .tax-note:empty {
+    display: none;
+  }
+
+  form.payment-terms {
+    padding-top: 0.5em;
+  }
+
+  .installments:not(:has(shopify-payment-terms)) {
+    display: none;
+  }
+{% endstylesheet %}
 
 {% schema %}
-  {
-    "name": "t:blocks.price",
-    "settings": [
-      {
-        "type": "color",
-        "id": "color",
-        "label": "t:general.color"
-      },
-      {
-        "type": "select",
-        "id": "variant",
-        "label": "t:general.text_style",
-        "default": "type-body",
-        "options": [
-          { "value": "type-display", "label": "t:variants.text_style.display" },
-          { "value": "type-heading-xl", "label": "t:variants.text_style.heading_xl" },
-          { "value": "type-heading-lg", "label": "t:variants.text_style.heading_lg" },
-          { "value": "type-heading-md", "label": "t:variants.text_style.heading_md" },
-          { "value": "type-heading-sm", "label": "t:variants.text_style.heading_sm" },
-          { "value": "type-body-lg", "label": "t:variants.text_style.body_lg" },
-          { "value": "type-body", "label": "t:variants.text_style.body" },
-          { "value": "type-body-sm", "label": "t:variants.text_style.body_sm" },
-          { "value": "type-overline", "label": "t:variants.text_style.overline" }
-        ]
-      }
-    ]
-  }
+{
+  "name": "t:names.product_price",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_price"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:content.edit_price_in_theme_settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_price_first",
+      "label": "t:settings.show_sale_price_first",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_installments",
+      "label": "t:settings.installments",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tax_info",
+      "label": "t:settings.show_tax_info",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "type_preset",
+      "label": "t:settings.preset",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "paragraph",
+          "label": "t:options.paragraph"
+        },
+        {
+          "value": "h1",
+          "label": "t:options.h1"
+        },
+        {
+          "value": "h2",
+          "label": "t:options.h2"
+        },
+        {
+          "value": "h3",
+          "label": "t:options.h3"
+        },
+        {
+          "value": "h4",
+          "label": "t:options.h4"
+        },
+        {
+          "value": "h5",
+          "label": "t:options.h5"
+        },
+        {
+          "value": "h6",
+          "label": "t:options.h6"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "info": "t:info.edit_presets_in_theme_settings"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:options.fit_content"
+        },
+        {
+          "value": "100%",
+          "label": "t:options.fill"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:settings.alignment",
+      "default": "left",
+      "visible_if": "{{ block.settings.width != 'fit-content' }}"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "t:settings.font",
+      "options": [
+        {
+          "value": "var(--font-body--family)",
+          "label": "t:options.body"
+        },
+        {
+          "value": "var(--font-subheading--family)",
+          "label": "t:options.subheading"
+        },
+        {
+          "value": "var(--font-heading--family)",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "var(--font-accent--family)",
+          "label": "t:options.accent"
+        }
+      ],
+      "default": "var(--font-body--family)",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:settings.size",
+      "options": [
+        {
+          "value": "",
+          "label": "t:options.default"
+        },
+        {
+          "value": "0.625rem",
+          "label": "10px"
+        },
+        {
+          "value": "0.75rem",
+          "label": "12px"
+        },
+        {
+          "value": "0.875rem",
+          "label": "14px"
+        },
+        {
+          "value": "1rem",
+          "label": "16px"
+        },
+        {
+          "value": "1.125rem",
+          "label": "18px"
+        },
+        {
+          "value": "1.25rem",
+          "label": "20px"
+        },
+        {
+          "value": "1.5rem",
+          "label": "24px"
+        },
+        {
+          "value": "2rem",
+          "label": "32px"
+        },
+        {
+          "value": "2.5rem",
+          "label": "40px"
+        },
+        {
+          "value": "3rem",
+          "label": "48px"
+        },
+        {
+          "value": "3.5rem",
+          "label": "56px"
+        },
+        {
+          "value": "4.5rem",
+          "label": "72px"
+        },
+        {
+          "value": "5.5rem",
+          "label": "88px"
+        },
+        {
+          "value": "7.5rem",
+          "label": "120px"
+        },
+        {
+          "value": "9.5rem",
+          "label": "152px"
+        },
+        {
+          "value": "11.5rem",
+          "label": "184px"
+        }
+      ],
+      "default": "1rem",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "t:settings.line_height",
+      "options": [
+        {
+          "value": "tight",
+          "label": "t:options.tight"
+        },
+        {
+          "value": "normal",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "loose",
+          "label": "t:options.loose"
+        }
+      ],
+      "default": "normal",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "letter_spacing",
+      "label": "t:settings.letter_spacing",
+      "options": [
+        {
+          "value": "tight",
+          "label": "t:options.tight"
+        },
+        {
+          "value": "normal",
+          "label": "t:options.normal"
+        },
+        {
+          "value": "loose",
+          "label": "t:options.loose"
+        }
+      ],
+      "default": "normal",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "t:settings.case",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.default"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:options.uppercase"
+        }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.type_preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "color",
+      "label": "t:settings.color",
+      "options": [
+        {
+          "value": "var(--color-foreground)",
+          "label": "t:options.text"
+        },
+        {
+          "value": "var(--color-foreground-heading)",
+          "label": "t:options.heading"
+        },
+        {
+          "value": "var(--color-primary)",
+          "label": "t:options.link"
+        }
+      ],
+      "default": "var(--color-foreground)",
+      "visible_if": "{{ block.settings.type_preset != 'rte' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_price",
+      "category": "t:categories.product"
+    }
+  ]
+}
 {% endschema %}
+{% # theme-check-enable %}

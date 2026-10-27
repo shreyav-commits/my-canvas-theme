@@ -1,0 +1,483 @@
+{% doc %}
+  @prompt
+    create a track an order form with input to add the order number and get the order details for customer
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-track-order-{{ ai_gen_id }} {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: {{ block.settings.padding }}px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .ai-track-order__header-{{ ai_gen_id }} {
+    margin-bottom: 20px;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-track-order__title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin-bottom: 10px;
+  }
+
+  .ai-track-order__description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};}
+
+  .ai-track-order__form-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .ai-track-order__input-wrapper-{{ ai_gen_id }} {
+    position: relative;
+  }
+
+  .ai-track-order__input-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid {{ block.settings.input_border_color }};
+    border-radius: {{ block.settings.input_border_radius }}px;
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    background-color: {{ block.settings.input_background_color }};}
+
+  .ai-track-order__input-{{ ai_gen_id }}:focus {
+    outline: none;
+    border-color: {{ block.settings.primary_color }};box-shadow: 0 0 0 1px {{ block.settings.primary_color }};
+  }
+
+  .ai-track-order__button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: {{ block.settings.button_background_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.text_size }}px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .ai-track-order__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background_color }};
+  }
+
+  .ai-track-order__result-{{ ai_gen_id }} {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: {{ block.settings.border_radius }}px;
+    display: none;
+  }
+
+  .ai-track-order__result-{{ ai_gen_id }}.success {
+    background-color: {{ block.settings.success_background_color }};
+    color: {{ block.settings.success_text_color }};display: block;
+  }
+
+  .ai-track-order__result-{{ ai_gen_id }}.error {
+    background-color: {{ block.settings.error_background_color }};
+    color: {{ block.settings.error_text_color }};
+    display: block;
+  }
+
+  .ai-track-order__error-message-{{ ai_gen_id }} {
+    color: {{ block.settings.error_text_color }};
+    font-size: 14px;
+    margin-top: 5px;display: none;
+  }
+
+  .ai-track-order__error-message-{{ ai_gen_id }}.active {
+    display: block;
+  }
+
+  @media screen and (min-width: 768px) {
+    .ai-track-order__form-{{ ai_gen_id }} {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .ai-track-order__input-wrapper-{{ ai_gen_id }} {
+      flex: 1;
+    }
+
+    .ai-track-order__button-wrapper-{{ ai_gen_id }} {
+      margin-top: 0;
+    }
+
+    .ai-track-order__button-{{ ai_gen_id }} {
+      margin-top: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    .ai-track-order__form-{{ ai_gen_id }} {
+      flex-direction: column;
+    }
+
+    .ai-track-order__button-wrapper-{{ ai_gen_id }} {
+      width: 100%;}
+
+    .ai-track-order__button-{{ ai_gen_id }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-track-order-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-track-order__header-{{ ai_gen_id }}">
+    <h2 class="ai-track-order__title-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+    <div class="ai-track-order__description-{{ ai_gen_id }}">{{ block.settings.description }}</div>
+  </div>
+
+  <form id="track-order-form-{{ ai_gen_id }}" class="ai-track-order__form-{{ ai_gen_id }}">
+    <div class="ai-track-order__input-wrapper-{{ ai_gen_id }}">
+      <input 
+        type="text" 
+        id="order-number-{{ ai_gen_id }}" 
+        class="ai-track-order__input-{{ ai_gen_id }}" 
+        placeholder="{{ block.settings.input_placeholder }}" 
+        aria-label="{{ block.settings.input_placeholder }}"
+        required
+      >
+      <div id="order-error-{{ ai_gen_id }}" class="ai-track-order__error-message-{{ ai_gen_id }}">
+        {{ block.settings.validation_message }}
+      </div>
+    </div>
+    <div class="ai-track-order__button-wrapper-{{ ai_gen_id }}">
+      <button type="submit" class="ai-track-order__button-{{ ai_gen_id }}">
+        {{ block.settings.button_text }}
+      </button>
+    </div>
+  </form>
+
+  <div id="order-result-{{ ai_gen_id }}" class="ai-track-order__result-{{ ai_gen_id }}"></div>
+</div>
+
+<script>
+  (function() {
+    class TrackOrderForm extends HTMLElement {
+      constructor() {
+        super();
+        this.form = document.getElementById('track-order-form-{{ ai_gen_id }}');
+        this.orderInput = document.getElementById('order-number-{{ ai_gen_id }}');
+        this.errorMessage = document.getElementById('order-error-{{ ai_gen_id }}');
+        this.resultContainer = document.getElementById('order-result-{{ ai_gen_id }}');
+        this.validationPattern = /^[a-zA-Z0-9]{3,20}$/;
+        this.form.addEventListener('submit', this.handleSubmit.bind(this));}
+
+      handleSubmit(event) {
+        event.preventDefault();
+        
+        // Reset previous results
+        this.resultContainer.className = 'ai-track-order__result-{{ ai_gen_id }}';
+        this.resultContainer.textContent = '';
+        this.errorMessage.classList.remove('active');
+        
+        const orderNumber = this.orderInput.value.trim();
+        
+        // Validate the order number format
+        if (!this.validationPattern.test(orderNumber)) {
+          this.errorMessage.classList.add('active');
+          return;
+        }
+        
+        // Simulate order lookup (in a real implementation, this would be an API call)
+        this.lookupOrder(orderNumber);
+      }
+      
+      lookupOrder(orderNumber) {
+        // This is a simulation - in a real implementation, you would make an API call to your order system
+        // For demo purposes, we'll simulate success for order numbers starting with "A" and errors for others
+        
+        // Simulate network delay
+        setTimeout(() => {
+          if (orderNumber.toUpperCase().startsWith('A')) {
+            // Simulate a successful order lookup
+            this.resultContainer.className = 'ai-track-order__result-{{ ai_gen_id }} success';
+            this.resultContainer.innerHTML = `
+              <h3>Order #${orderNumber}</h3>
+              <p>Status: <strong>Shipped</strong></p>
+              <p>Expected delivery: ${this.getRandomFutureDate()}</p>
+              <p>Last update: ${this.formatDate(new Date())}</p>
+            `;
+          } else {
+            // Simulate an error
+            this.resultContainer.className = 'ai-track-order__result-{{ ai_gen_id }} error';
+            this.resultContainer.textContent = {{ block.settings.not_found_message | json }};
+          }
+        }, 800);
+      }
+      
+      getRandomFutureDate() {
+        const today = new Date();
+        const futureDate = new Date(today);
+        futureDate.setDate(today.getDate() + Math.floor(Math.random() * 7) + 3); // Random date 3-10 days in future
+        return this.formatDate(futureDate);
+      }
+      
+      formatDate(date) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+      }
+    }
+    
+    customElements.define('track-order-form-{{ ai_gen_id }}', TrackOrderForm);
+    
+    // Initialize the component
+    const trackOrderForm = document.querySelector('.ai-track-order-{{ ai_gen_id }}');
+    if (trackOrderForm && !trackOrderForm.__initialized) {
+      new TrackOrderForm();
+      trackOrderForm.__initialized = true;
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Track Order Form",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Track Your Order"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Enter your order number to check the current status of your order.</p>"
+    },
+    {
+      "type": "text",
+      "id": "input_placeholder",
+      "label": "Input placeholder",
+      "default": "Enter your order number"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Track Order"
+    },
+    {
+      "type": "text",
+      "id": "validation_message",
+      "label": "Validation error message",
+      "default": "Please enter a valid order number"
+    },
+    {
+      "type": "text",
+      "id": "not_found_message",
+      "label": "Order not found message",
+      "default": "We couldn't find an order with that number. Please check and try again."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary color",
+      "default": "#000f9f"
+    },
+    {
+      "type": "header",
+      "content": "Input"
+    },
+    {
+      "type": "color",
+      "id": "input_background_color",
+      "label": "Input background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Input border color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Input border radius",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button background color",
+      "default": "#000f9f"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background_color",
+      "label": "Button hover background color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button border radius",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Result Messages"
+    },
+    {
+      "type": "color",
+      "id": "success_background_color",
+      "label": "Success background color",
+      "default": "#f0f8f0"
+    },
+    {
+      "type": "color",
+      "id": "success_text_color",
+      "label": "Success text color",
+      "default": "#2c6e2c"
+    },
+    {
+      "type": "color",
+      "id": "error_background_color",
+      "label": "Error background color",
+      "default": "#fff0f0"
+    },
+    {
+      "type": "color",
+      "id": "error_text_color",
+      "label": "Error text color",
+      "default": "#cc0000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Track Order Form"
+    }
+  ],
+  "class": "track-order-block"
+}
+{% endschema %}

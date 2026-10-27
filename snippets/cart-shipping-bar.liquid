@@ -1,0 +1,105 @@
+{% if settings.shipping_free %}
+  <div class="cart-drawer_shipping-bar">
+    {%- liquid
+      assign promote_txt = settings.promote_free_shipping_txt
+      assign unlocked_txt = settings.unlocked_free_shipping_txt
+      assign threshold = settings.free_shipping_threshold | times: 100
+      assign shipping_quotient = settings.free_shipping_threshold
+      assign shipping_percent = cart.total_price | divided_by: shipping_quotient | at_most: 100
+      assign value_left = threshold | minus: cart.total_price
+      assign value_left_money = value_left | money
+        
+      if settings.currency_code_enabled_product_pages
+        assign value_left_money = value_left | money_with_currency
+      endif
+
+      assign shipping_text = unlocked_txt
+      if value_left > 0
+        assign shipping_text = promote_txt | replace: '[value]', value_left_money
+      else
+        assign shipping_percent = 100
+      endif
+    -%}
+
+    <div
+      class="shipping-bar sticky-shipping{% if value_left <= 0 %} shipping-bar-success shipping_bar-eligible{% endif %}"
+      data-promote="{{promote_txt}}"
+      data-unlocked="{{unlocked_txt}}"
+      data-threshold="{{threshold}}"
+      data-percent="{{shipping_percent}}"
+    >
+      <div class="shipping-bar__message">
+        <span class="shipping-bar-image">
+          <img
+            style="float:right;margin-left: 5px;"
+            height="25px"
+            width="25px"
+            src="{{ 'ship-truck.webp' | file_url }}"
+          >
+        </span>
+        {{ shipping_text | replace: '<p','<p class="shipping-bar-text"' -}}
+      </div>
+      <div class="progress-bar-wrapper"><div class="progress-bar" style="width: {{shipping_percent}}%;"></div></div>
+    </div>
+  </div>
+  {% style %}
+    .cart-drawer_shipping-bar {
+        padding: var(--cart-drawer-padding-desktop);
+        padding-top: 0;
+    }
+    .shipping-bar {
+        position: relative;
+    }
+    .shipping-bar .shipping-bar__message {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .shipping-bar .shipping-bar-image {
+        max-width: 20%;
+        width: 100%;
+    }
+    .shipping-bar .shipping-bar-text {
+        margin: 0;
+    }
+    .shipping-bar .progress-bar-wrapper {
+        width: 100%;
+        background-color: #dddddd;
+        border-radius: 16px;
+        padding: 2px;
+        margin-top: 10px;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 5px
+    }
+    .shipping-bar .progress-bar {
+        background-color: #000;
+        border-radius: 16px;
+        padding: 2px;
+        margin-top: 10px;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 5px;
+        transition: width 0.5s ease-in-out;
+        max-width: 100%;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    .shipping-bar.shipping-bar-success .progress-bar {
+        background-color: green;
+    }
+    cart-drawer-component:has(.cart-drawer_shipping-bar) .cart-drawer__header {
+        padding-bottom: 0;
+    }
+    @media screen and (max-width: 375px) {
+      .shipping-bar .shipping-bar-image {
+        max-width: 15%;
+      }
+      .shipping-bar .shipping-bar-text {
+        font-size: 12px;
+      }
+    }
+  {% endstyle %}
+{%- endif -%}

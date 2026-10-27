@@ -1,0 +1,40 @@
+{% for block in section.block %}
+    {{ block.settings.text }}
+{% endfor %}
+
+{% schema %}
+{
+    "name": "Test Metaobject",
+    "class": "test-metaobject",
+    "settings":[],
+    "presets":[
+        {
+            "name":"Test Metaobject"
+        }
+    ],
+    "blocks": [
+        {
+            "name":"test-block",
+            "type":"test-block",
+            "settings":[
+                {
+                    "label":"Text",
+                    "id":"text",
+                    "type":"text"
+                }
+            ]
+        },
+        {
+            "name":"richtext",
+            "type":"test-block-2",
+            "settings":[
+                {
+                    "label":"textarea",
+                    "id":"textarea",
+                    "type":"textarea"
+                }
+            ]
+        }
+    ]
+}
+{% endschema %}

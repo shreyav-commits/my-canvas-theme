@@ -1,0 +1,138 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "header",
+  "name": "Header",
+  "sections": {
+    "header_section": {
+      "type": "header",
+      "blocks": {
+        "header-logo": {
+          "type": "_header-logo",
+          "static": true,
+          "settings": {
+            "hide_logo_on_home_page": false,
+            "custom_height": 48,
+            "custom_height_mobile": 12,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "header-menu": {
+          "type": "_header-menu",
+          "static": true,
+          "settings": {
+            "menu": "main-menu",
+            "menu_style": "featured_collections",
+            "featured_products_aspect_ratio": "4 / 5",
+            "featured_collections_aspect_ratio": "16 / 9",
+            "image_border_radius": 0,
+            "product_title_case": "default",
+            "collection_title_case": "default",
+            "color_scheme": "",
+            "menu_font_style": "inverse",
+            "type_font_primary_link": "body",
+            "type_font_primary_size": "0.875rem",
+            "type_case_primary_link": "none",
+            "type_font_secondary_link": "body",
+            "type_case_secondary_link": "none",
+            "type_font_tertiary_link": "body",
+            "type_case_tertiary_link": "none",
+            "navigation_bar": false,
+            "color_scheme_navigation_bar": "",
+            "drawer_accordion": false,
+            "drawer_accordion_expand_first": false,
+            "drawer_dividers": false
+          },
+          "blocks": {
+            "mega_menu_D9aGUL": {
+              "type": "_mega-menu",
+              "name": "Custom mega menu",
+              "settings": {
+                "block_title": "Wholesale",
+                "image_1": "shopify://shop_images/enhanced-matte-paper-framed-poster-_in_-red-oak-11x14-transparent-66b8e28777644.jpg",
+                "text_1": "Shop Frames",
+                "url_1": "shopify://collections/bleumur-frames",
+                "image_2": "shopify://shop_images/kayla-elizabeth-blingsstack-shoe-jewelry-evil-eye_1100x_1c312426-859d-4675-97de-c97f589fdc3d.webp",
+                "text_2": "Shop Evil Eye",
+                "url_2": "shopify://collections/evil-eye",
+                "image_3": "shopify://shop_images/Muscle_Back_Tee_Bombshell_Sportswear_06.jpg",
+                "text_3": "Shop Bombshell",
+                "url_3": "shopify://collections/bombshell-sportswear",
+                "image_4": "shopify://shop_images/image_23.png",
+                "text_4": "Demo Product",
+                "url_4": "shopify://products/burger"
+              },
+              "blocks": {}
+            },
+            "mega_menu_Vj7LYF": {
+              "type": "_mega-menu",
+              "name": "Custom mega menu",
+              "settings": {
+                "block_title": "Look book",
+                "image_1": "shopify://shop_images/kayla-elizabeth-classic-bling-shoe-jewelry-shoe-charm-stack.jpg",
+                "text_1": "Shop Bling Bling",
+                "url_1": "shopify://collections/bling-bling",
+                "image_2": "shopify://shop_images/kayla_elizabeth_shoelry_silver_bling_pdp.jpg",
+                "text_2": "Shop Bling Sparkling",
+                "url_2": "shopify://collections/bling-bling-series",
+                "text_3": "",
+                "url_3": "",
+                "text_4": "",
+                "url_4": ""
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "mega_menu_D9aGUL",
+            "mega_menu_Vj7LYF"
+          ]
+        }
+      },
+      "settings": {
+        "logo_position": "left",
+        "menu_position": "center",
+        "menu_row": "top",
+        "show_search": true,
+        "search_position": "right",
+        "search_row": "top",
+        "show_country": true,
+        "country_selector_style": true,
+        "show_language": true,
+        "localization_font": "heading",
+        "localization_font_size": "1rem",
+        "localization_position": "right",
+        "localization_row": "top",
+        "section_width": "page-width",
+        "section_height": "standard",
+        "enable_sticky_header": "scroll-up",
+        "divider_width": 0,
+        "divider_size": "page-width",
+        "border_width": 0,
+        "color_scheme_top": "scheme-1",
+        "color_scheme_bottom": "",
+        "color_scheme_transparent": "scheme-6",
+        "enable_transparent_header_home": false,
+        "home_color_scheme": "inverse",
+        "enable_transparent_header_product": false,
+        "product_color_scheme": "default",
+        "enable_transparent_header_collection": false,
+        "collection_color_scheme": "default"
+      }
+    }
+  },
+  "order": [
+    "header_section"
+  ]
+}

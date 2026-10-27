@@ -1,0 +1,174 @@
+{%- doc -%}
+  Renders a cart shipping protection form.
+
+  @param {string} section_id - The section ID
+{%- enddoc -%}
+
+{% assign shipping_prod = settings.shipping_prod %}
+{%- assign shipping_product = cart | item_count_for_variant: shipping_prod.first_available_variant.id -%}
+<shipping-protection
+  data-auto-add="{{ settings.auto_add_enable }}"
+  data-section-id="{{ section_id }}"
+  data-variant-id="{{- shipping_prod.first_available_variant.id -}}"
+  data-product-id="{{- shipping_prod.id -}}"
+  {% if shipping_product > 0 %}
+    checked
+  {% endif %}
+  >
+  <div class="cst-sp-wrapper" style="padding-block: var(--padding-sm);">
+    <label for="switch-toggle" class="switch-container">
+      <span class="label icon-flex">
+        <span class="switch-image"><img src="{{ 'Shipping_protection_img.webp' | file_url }}" alt="shipping protection"/></span>
+        <span id="switch-label" class="h6">Shipping Protection<span class="switch-price">{{ shipping_prod.price | money }}</span></span>
+      </span>
+      <div class="switch-wrapper">
+        <span id="switch-status" class="switch-status" aria-hidden="true" ref="shippingLabel">{% if shipping_product > 0 %}ON{% else %}OFF{% endif %}</span>
+        <div class="switch">
+          <input
+            id="switch-toggle"
+            type="checkbox"
+            role="switch"
+            aria-labelledby="switch-label"
+            ref="shippingInput"
+            {% if shipping_product > 0 %}
+              checked
+            {% endif %}
+          >
+          <span class="slider"></span>
+        </div>
+      </div>
+    </label>
+    {% style %}
+      .cst-sp-wrapper .switch-container {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        row-gap: 1em;
+        cursor: pointer;
+        border-radius: 8px;
+      }
+
+      .cst-sp-wrapper .switch-wrapper {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        row-gap: 1em;
+      }
+      .cst-sp-wrapper .switch-container:hover,
+      .cst-sp-wrapper .switch-container:has(input:focus),
+      .cst-sp-wrapper .switch-container:has(input:focus-visible) {
+        outline: 2px solid grey;
+      }
+
+      .cst-sp-wrapper .label {
+        margin-right: 1em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .cst-sp-wrapper .label .h6 {
+        display: flex;
+        flex-direction: column;  
+      }
+      
+      .cst-sp-wrapper .switch {
+        --_switch-height: 24px;
+        --_switch-width: 48px;
+        position: relative;
+        margin-left: 0.5em;
+        height: var(--_switch-height);
+        width: var(--_switch-width);
+      }
+
+      .cst-sp-wrapper .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .cst-sp-wrapper .slider {
+        --outline-width: 1px;
+        position: absolute;
+        inset: 0;
+        background-color: var(--primary-dark-light);
+        border-radius: 9999px;
+        outline: 1px solid grey;
+        cursor: pointer;
+      }
+
+      .cst-sp-wrapper .slider::before {
+        --_ratio: 80%;
+        --_offset: 2px;
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: var(--_offset);
+        right: unset;
+        translate: 0 -50%;
+        height: var(--_ratio);
+        aspect-ratio: 1 / 1;
+        background-color: darkgrey;
+        border-radius: 50%;
+      }
+
+      .cst-sp-wrapper .switch input:checked + .slider {
+        background-color: black;
+        filter: brightness(130%);
+        transition: background-color var(--transition-duration-timing-to);
+      }
+
+      .cst-sp-wrapper .switch input:checked + .slider::before {
+        left: 0;
+        translate: calc(calc(var(--_switch-width) - 100%) - var(--_offset)) -50%;
+      }
+
+      .cst-sp-wrapper .switch-image {
+          max-width: 50px;
+          display: block;
+          height: auto;
+          width: 100%;
+      }
+      
+      @media (prefers-reduced-motion: no-preference) {
+        .cst-sp-wrapper .slider {
+          transition: background-color var(--transition-duration-timing-from);
+        }
+
+        .cst-sp-wrapper .switch input:checked + .slider {
+          transition: background-color var(--transition-duration-timing-to);
+        }
+
+        .cst-sp-wrapper .switch input:checked + .slider::before {
+          transition: translate var(--transition-duration-timing-to);
+        }
+      }
+
+      .cst-sp-wrapper .switch-status {
+        color: grey;
+        opacity: 0.85;
+      }
+
+      .cst-sp-wrapper .switch:has(#switch-toggle[checked]) + .switch-status {
+        opacity: 1;
+        font-weight: 500;
+      }
+
+      .cst-sp-wrapper .switch-price {
+        color: grey;
+        font-size: 14px;
+        margin-top: 8px;
+      }
+      @media screen and (max-width: 375px) {
+        .cst-sp-wrapper .switch-image {
+          max-width: 35px;
+        }
+        .cst-sp-wrapper .switch {
+            --_switch-height: 18px;
+            --_switch-width: 36px;
+        }
+      }
+    {% endstyle %}
+  </div>
+</shipping-protection>

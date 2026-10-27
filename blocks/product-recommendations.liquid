@@ -1,112 +1,445 @@
-{% doc %}
-  Product recommendations. Renders a lazy-loaded grid of related or complementary products
-  for the current product, sourced from Shopify's Product Recommendations API. Capture
-  the caller-owned `card`, `image`, `text`, and `price` loop as `recommendations_content`.
-  Compose an optional heading in the block body above the grid.
+{% # import schema from '../schemas/blocks/product-recommendations.js' %}
 
-  Place on a product template (needs `product` in scope).
+{%- doc -%}
+  Renders product recommendations.
+  {section.id} - identifies the parent section for the Section Rendering API
 
-  @param {string} recommendations_content - Caller-captured recommendation card grid. @required
-  @param {number} [limit] - Max products to show. Falls back to the `max_products` setting, then 4.
-  @param {string} [intent] - 'related' or 'complementary'. Falls back to the `recommendation_type` setting, then 'related'.
-  @param {string} [columns] - Grid column utilities. Default: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'.
-  @param {string} [class] - Additional CSS classes appended to the root element.
-  @param {string} [attributes] - Additional HTML attributes passed through to the root element.
+  https://shopify.dev/docs/api/section-rendering-api
+{%- enddoc -%}
 
-  @category product
-  @renders s-product-recommendations
+<script
+  src="{{ 'product-recommendations.js' | asset_url }}"
+  type="module"
+></script>
 
-  @example Template-owned card grid
-  {% assign rec_columns = 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' %}
-  {% capture rec_grid %}
-    <div class="grid {{ rec_columns }} gap-4">
-      {% for rec_product in recommendations.products %}
-        {% assign rec_variant = rec_product.selected_or_first_available_variant %}
-        <s-view-event class="block" view-event-trigger="intersect" view-event-payload="{{ rec_product | standard_event_data: 'view' | escape }}">
-          {% block 'card', block.name: 't:blocks.product_card', url: rec_product.url, aria_label: rec_product.title, border_radius: 'rounded-card' %}
-            <a href="{{ rec_product.url | escape }}" class="relative block overflow-hidden rounded-[inherit]" aria-label="{{ rec_product.title | escape }}">
-              {% block 'image', fallback_image: rec_product.featured_image, aspect_ratio: 'aspect-square', sizes: '(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw', alt: rec_product.title, attributes: 'loading="lazy"', seed: forloop.index %}{% endblock %}
-            </a>
-            <div class="flex flex-col gap-0.5">
-              {% block 'text', variant: 'type-body-sm', tag: 'h3', class: 'font-medium text-on-surface line-clamp-2' %}{{ rec_product.title | escape }}{% endblock %}
-              {% block 'price', price: rec_variant.price, compare_at_price: rec_variant.compare_at_price, price_min: rec_product.price_min, price_max: rec_product.price_max, class: 'text-sm font-medium self-start group-[.text-center]/card:self-center group-[.text-end]/card:self-end' %}{% endblock %}
-            </div>
-          {% endblock %}
-        </s-view-event>
-      {% endfor %}
-    </div>
-  {% endcapture %}
-  {% block 'product-recommendations', recommendations_content: rec_grid, columns: rec_columns %}{% endblock %}
-{% enddoc %}
+{% liquid
+  case block.settings.layout_type
+    when 'grid'
+      assign classes = 'resource-list--grid'
+    when 'carousel'
+      assign classes = 'resource-list--carousel'
+  endcase
+%}
 
-{%- liquid
-  assign rec_limit = limit | default: block.settings.max_products | default: 4
-  assign rec_intent = intent | default: block.settings.recommendation_type | default: 'related'
-  assign grid_columns = columns | default: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-  assign rec_id = 'product-recommendations-' | append: block.id
+{% comment %}
+  [data-section-id] {section.id} - used to fetch the product recommendations from the Section Rendering API
+{% endcomment %}
 
-  # The partial name is shared with s-product-recommendations.js for fetching and replacing the grid.
-  assign partial_name = 'product-recommendations'
-  assign rec_url = routes.product_recommendations_url | append: '?intent=' | append: rec_intent | append: '&limit=' | append: rec_limit
--%}
-
-<s-product-recommendations
-  id="{{ rec_id }}"
-  class="block{% if class %} {{ class }}{% endif %}"
-  data-url="{{ rec_url }}"
-  data-product-id="{{ product.id }}"
-  data-intent="{{ rec_intent }}"
-  data-partial="{{ partial_name }}"
-  data-performed="{{ recommendations.performed }}"
-  {%- if recommendations.performed and recommendations.products_count == 0 %} hidden{% endif %}
-  {%- if attributes != blank %} {{ attributes }}{% endif %}
+<product-recommendations
+  id="product-recommendations-{{ block.id }}"
+  class="product-recommendations"
+  data-url="{{ routes.product_recommendations_url }}?limit={{ block.settings.max_products }}"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ closest.product.id }}"
+  data-intent="{{ block.settings.recommendation_type }}"
+  data-recommendations-performed="{{ recommendations.performed }}"
+  {% if request.visual_preview_mode %}
+    data-shopify-editor-preview
+  {% endif %}
+  data-testid="product-recommendations-block"
+  {{ block.shopify_attributes }}
 >
-  {%- if content != blank -%}
-    {{ content }}
-  {%- endif -%}
+  <div
+    class="
+      color-{{ section.settings.color_scheme }}
+      block-resource-list
+      spacing-style
+      gap-style
+    "
+    style="
+      {%  render 'spacing-style', settings: block.settings %}
+      {%  render 'gap-style', value: block.settings.gap %}
+      --resource-list-column-gap-desktop: {{ block.settings.columns_gap }}px;
+      --resource-list-row-gap-desktop: {{ block.settings.rows_gap }}px;
+      --resource-list-columns-mobile: repeat(auto-fill, minmax(9.25rem, 1fr));
+    "
+  >
+    <div class="section-resource-list__content">
+      {% content_for 'blocks' %}
+    </div>
 
-  {%- comment -%} partials.apply() swaps this named region wholesale. Keep the name in sync with data-partial. {%- endcomment -%}
-  {%- partial 'product-recommendations' -%}
-    {%- if recommendations.performed -%}
-      {%- if recommendations.products_count > 0 -%}
-        {{ recommendations_content }}
-      {%- endif -%}
+    {%- if recommendations.performed or closest.product == blank -%}
+      {% liquid
+        assign products = recommendations.products
+
+        if closest.product == blank
+          if request.design_mode or request.visual_preview_mode
+            # Onboarding mode: Show placeholder products
+            for i in (1..block.settings.max_products)
+              assign products = products | append: ', '
+              assign products = products | split: ','
+            endfor
+          endif
+        elsif recommendations.performed and recommendations.products_count == 0
+          # No recommendations found, pull from catalog
+          if block.settings.recommendation_type == 'related'
+            assign products = collections.all.products | reject: 'id', closest.product.id
+          elsif block.settings.recommendation_type == 'complementary'
+            # Do not recommend the All collection as complementary products
+            assign products = null
+          endif
+        else
+          assign products = recommendations.products
+        endif
+      %}
+      {% capture list_items %}
+        {% for product in products limit: block.settings.max_products %}
+          <div class="resource-list__item">
+            {% content_for 'block',
+              type: '_product-card',
+              id: 'static-product-card',
+              closest.product: product
+            %}
+          </div>
+          {% if block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile %}
+            {% unless forloop.last %}
+              <!--@list/split-->
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+      {% endcapture %}
+
+      {% liquid
+        # Create an array from the list items to be used in the carousel
+        assign slide_content = list_items | strip
+        assign slides = slide_content | split: '<!--@list/split-->'
+
+        if products != blank and products.size > 0
+          assign has_recommendations = 'true'
+        else
+          assign has_recommendations = 'false'
+        endif
+      %}
+
+      <div
+        class="
+          resource-list
+          {% if block.settings.carousel_on_mobile and block.settings.layout_type != 'carousel' %}
+            hidden--mobile
+          {% endif %}
+          {{ classes }}
+        "
+        {% if block.settings.layout_type == 'grid' %}
+          data-testid="resource-list-grid"
+        {% endif %}
+        data-has-recommendations="{{ has_recommendations }}"
+      >
+        {% case block.settings.layout_type %}
+          {% when 'grid' %}
+            {{ list_items }}
+          {% when 'carousel' %}
+            {% render 'resource-list-carousel',
+              ref: 'resourceListCarousel',
+              slides: slides,
+              slide_count: recommendations.products.size,
+              settings: block.settings
+            %}
+        {% endcase %}
+      </div>
+
+      {% if block.settings.carousel_on_mobile and block.settings.layout_type != 'carousel' %}
+        {% liquid
+          assign mobile_carousel_gap = block.settings.columns_gap
+        %}
+        <div
+          class="
+            resource-list
+            hidden--desktop
+            force-full-width
+          "
+          style="--resource-list-gap: {{ mobile_carousel_gap }}px;"
+        >
+          {% render 'resource-list-carousel',
+            ref: 'resourceListCarouselMobile',
+            slides: slides,
+            slide_count: recommendations.products.size,
+            settings: block.settings
+          %}
+        </div>
+      {% endif %}
     {%- else -%}
-      {%- comment -%} Skeletons are only for pending data, not an empty completed response. {%- endcomment -%}
-      <div class="grid {{ grid_columns }} gap-4" aria-hidden="true">
-        {%- for i in (1..rec_limit) -%}
-          <div class="aspect-square rounded-card bg-surface-secondary motion-safe:animate-pulse"></div>
-        {%- endfor -%}
+      <div class="resource-list resource-list--grid">
+        {% for i in (1..block.settings.max_products) %}
+          <div
+            class="resource-list__item product-recommendations__skeleton-item"
+            aria-label="{{ 'accessibility.loading_product_recommendations' | t }}"
+          ></div>
+        {% endfor %}
       </div>
     {%- endif -%}
-  {%- endpartial -%}
-</s-product-recommendations>
+  </div>
+</product-recommendations>
 
-<script type="module" src="{{ 's-product-recommendations.js' | asset_url }}"></script>
+{% stylesheet %}
+  .product-recommendations-wrapper {
+    width: 100%;
+  }
+
+  .product-recommendations-wrapper:has(product-recommendations[data-shopify-editor-preview]) {
+    width: 100vw;
+  }
+
+  .product-recommendations {
+    display: block;
+  }
+
+  .product-recommendations__skeleton-item {
+    aspect-ratio: 3 / 4;
+    background-color: var(--color-foreground);
+    opacity: var(--skeleton-opacity);
+    border-radius: 4px;
+  }
+{% endstylesheet %}
 
 {% schema %}
-  {
-    "name": "t:shopify_library.blocks.product_recommendations",
-    "settings": [
-      {
-        "type": "select",
-        "id": "recommendation_type",
-        "label": "t:shopify_library.blocks.product_recommendations_settings.type",
-        "default": "related",
-        "options": [
-          { "value": "related", "label": "t:shopify_library.blocks.product_recommendations_settings.type_related" },
-          { "value": "complementary", "label": "t:shopify_library.blocks.product_recommendations_settings.type_complementary" }
-        ]
+{
+  "name": "t:names.product_recommendations",
+  "class": "product-recommendations-wrapper",
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:content.resource_reference_product_recommendations"
+    },
+    {
+      "type": "select",
+      "id": "recommendation_type",
+      "label": "t:settings.type",
+      "options": [
+        {
+          "value": "related",
+          "label": "t:options.related"
+        },
+        {
+          "value": "complementary",
+          "label": "t:options.complementary"
+        }
+      ],
+      "default": "related"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:content.complementary_products"
+    },
+    {
+      "type": "header",
+      "content": "t:content.cards_layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_type",
+      "label": "t:settings.layout_style",
+      "options": [
+        {
+          "value": "grid",
+          "label": "t:options.grid"
+        },
+        {
+          "value": "carousel",
+          "label": "t:options.carousel"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "checkbox",
+      "id": "carousel_on_mobile",
+      "label": "t:settings.carousel_on_mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.layout_type == 'grid' }}"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "t:settings.product_count",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "columns_gap",
+      "label": "t:settings.horizontal_gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.layout_type == 'grid' or block.settings.layout_type == 'carousel' }}"
+    },
+    {
+      "type": "range",
+      "id": "rows_gap",
+      "label": "t:settings.vertical_gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.layout_type == 'grid' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.carousel_navigation",
+      "visible_if": "{{ block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile == true }}"
+    },
+    {
+      "type": "select",
+      "id": "icons_style",
+      "label": "t:settings.icon",
+      "options": [
+        {
+          "value": "arrow",
+          "label": "t:options.arrows"
+        },
+        {
+          "value": "chevron",
+          "label": "t:options.chevrons"
+        },
+        {
+          "value": "arrows_large",
+          "label": "t:options.arrows_large"
+        },
+        {
+          "value": "chevron_large",
+          "label": "t:options.chevron_large"
+        },
+        {
+          "value": "none",
+          "label": "t:options.none"
+        }
+      ],
+      "default": "arrow",
+      "visible_if": "{{ block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile == true }}"
+    },
+    {
+      "type": "select",
+      "id": "icons_shape",
+      "label": "t:settings.icon_background",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:options.none"
+        },
+        {
+          "value": "circle",
+          "label": "t:options.circle"
+        },
+        {
+          "value": "square",
+          "label": "t:options.square"
+        }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.icons_style != 'none' and block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:settings.gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.product_recommendations",
+      "category": "t:categories.product",
+      "settings": {
+        "recommendation_type": "related"
       },
-      {
-        "type": "range",
-        "id": "max_products",
-        "label": "t:shopify_library.blocks.product_recommendations_settings.max_products",
-        "min": 2,
-        "max": 10,
-        "step": 1,
-        "default": 4
-      }
-    ]
-  }
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "<h4>You may also like</h4>"
+          }
+        },
+        "static-product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {},
+          "blocks": {
+            "product-card-gallery": {
+              "type": "_product-card-gallery"
+            },
+            "group": {
+              "type": "_product-card-group",
+              "settings": {
+                "content_direction": "column",
+                "gap": 4
+              },
+              "blocks": {
+                "product_title": {
+                  "type": "product-title",
+                  "name": "t:names.title",
+                  "settings": {
+                    "type_preset": "h5"
+                  }
+                },
+                "price": {
+                  "type": "price",
+                  "settings": {
+                    "show_tax_info": false
+                  }
+                },
+                "swatches": {
+                  "type": "swatches"
+                }
+              },
+              "block_order": ["product_title", "price", "swatches"]
+            }
+          },
+          "block_order": ["product-card-gallery", "group"]
+        }
+      },
+      "block_order": ["heading"]
+    }
+  ]
+}
 {% endschema %}

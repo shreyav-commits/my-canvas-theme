@@ -1,0 +1,239 @@
+{%- liquid
+  assign classes = 'resource-list__carousel upsell-resource-list__carousel'
+  capture styles
+    echo '--resource-list-column-gap-desktop: ' | append: section.settings.columns_gap | append: 'px;'
+    echo '--column-count: ' | append: section.settings.columns | append: ';'
+    echo '--column-count-mobile: ' | append: section.settings.mobile_columns | append: ';'
+  endcapture
+-%}
+
+{%- if settings.upsell_list != blank and settings.show_upsell -%}
+  <cart-upsell-component data-section-id="{{ section.id }}" style="width: 100%">
+    <div id="upsell-inner" style="width: 100%">
+      <accordion-custom class="cart-upsells">
+        <details
+          class="details upsell-details"
+          declarative-open
+        >
+          <summary class="cart-discount__summary">
+            <span class="cart-discount__label h6">{%- content_for 'block', type: '_product-list-content', id: 'static-header' -%}</span>
+
+            <span class="svg-wrapper icon-plus">
+              {{- 'icon-plus.svg' | inline_asset_content -}}
+            </span>
+          </summary>
+
+          <div class="details-content">
+  
+            {%- assign ct = 0 -%}
+            {%- capture list_items -%}
+            {%- for product in settings.upsell_list -%}
+              {%- assign not_found_product = cart | item_count_for_variant: product.first_available_variant.id -%}
+              {% if not_found_product == 0 %}
+                {%- assign ct = ct | plus: 1 -%}
+                <div class="resource-list__item">
+                  {% content_for 'block', type: 'product-card', id: 'upsell-product-card', closest.product: product, forloop: ct %}
+                </div>
+            
+                {%- if ct == settings.upsell_limit -%}{%- break -%}{%- endif -%}
+                {% unless forloop.last %}
+                  <!--@list/split-->
+                {% endunless %}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endcapture -%}
+  
+            <div
+              class="
+                section
+                section--{{ section.settings.section_width }}
+                color-{{ section.settings.color_scheme }}
+                section-resource-list
+                spacing-style
+                gap-style
+              "
+              style="
+                --column-count-mobile: {{ section.settings.mobile_columns }};
+                {% render 'spacing-style', settings: section.settings %}
+                {% render 'gap-style', value: section.settings.gap %}
+                {{ styles }}
+              "
+            >
+              <div
+                class="
+                  resource-list resource-list--{{ section.id }}
+                  force-full-width {{ classes }}
+                "
+                style="{{ styles }}"
+              >
+                {% liquid
+                  # Create an array from the list items to be used for different layout types
+                  assign list_items_array = list_items | strip | split: '<!--@list/split-->'
+                %}
+                {% render 'resource-list-carousel',
+                  ref: 'resourceListCarousel',
+                  slides: list_items_array,
+                  slide_count: settings.upsell_limit,
+                  settings: section.settings
+                %}
+              </div>
+            </div>
+          </div>
+        </details>
+      </accordion-custom>
+    </div>
+  </cart-upsell-component>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cart Upsell",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout_type",
+      "label": "t:settings.type",
+      "options": [
+        {
+          "value": "grid",
+          "label": "t:options.grid"
+        },
+        {
+          "value": "organic",
+          "label": "t:options.editorial"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "select",
+      "id": "product_card_size",
+      "label": "t:settings.card_size",
+      "options": [
+        {
+          "value": "small",
+          "label": "t:options.small"
+        },
+        {
+          "value": "medium",
+          "label": "t:options.medium"
+        },
+        {
+          "value": "large",
+          "label": "t:options.large"
+        },
+        {
+          "value": "extra-large",
+          "label": "t:options.extra_large"
+        }
+      ],
+      "default": "medium",
+      "visible_if": "{{ section.settings.layout_type == 'grid' }}"
+    },
+    {
+      "type": "select",
+      "id": "mobile_product_card_size",
+      "label": "t:settings.mobile_card_size",
+      "options": [
+        {
+          "value": "small",
+          "label": "t:options.small"
+        },
+        {
+          "value": "large",
+          "label": "t:options.large"
+        }
+      ],
+      "default": "small"
+    },
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "select",
+      "id": "product_grid_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "centered",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "centered"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_on_mobile",
+      "label": "t:settings.full_width_on_mobile",
+      "default": true,
+      "visible_if": "{{ section.settings.product_grid_width != 'full-width' }}"
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_horizontal",
+      "label": "t:settings.horizontal_gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_vertical",
+      "label": "t:settings.vertical_gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right_padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:content.section_layout"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["cart"],
+    "groups": ["footer"]
+  },
+  "presets": [
+    {
+      "name": "Upsell List",
+      "category": "t:categories.products",
+    }
+  ]
+}
+{% endschema %}

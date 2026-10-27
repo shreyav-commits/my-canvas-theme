@@ -1,0 +1,61 @@
+{%- liquid
+  # items_discount - line item discount - {boolean}
+  # discount_popup_html - discount popup html - {boolean}
+  # all_discounts - all the discounts from Theme Settings
+  # discount_message - discount message to show
+
+  assign items_discount = false
+  assign discount_popup_html = false
+  assign all_discounts = 'HOLI20||type_fixed||20,DIWALI10||type_fixed||10,EZE15||type_percent||15' | replace: ', ', ',' | replace: ' ,', ',' | replace: ' , ', ',' | split: ','
+  assign discount_message = '[savings] OFF LOCKED IN! [image]'
+
+  for item in cart.items
+    if item.line_level_discount_allocations.size > 0
+      assign items_discount = true
+    endif
+  endfor
+-%}
+
+{%- capture discount_icon -%}
+  {%- if settings.discount_icon != blank -%}
+    <div class="discount_icon-wrp"><img src="{{ settings.discount_icon | img_url: 'master' }}" alt="Discount icon"/></div>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- liquid
+  if cart.discount_applications.size > 0
+    if all_discounts.size > 0 and discount_message != blank
+      for dis_msg in all_discounts
+        assign dis_msg_label = dis_msg | split: '||'
+        assign discount_label = dis_msg_label[0] | strip | escape
+        for discount in cart.discount_applications
+          if discount.title == discount_label and discount_popup_html == false
+            assign savings = discount.total_allocated_amount | money
+            if dis_msg_label[1] == 'type_percent'
+              assign cart_subtotal = cart.total_price | plus: discount.total_allocated_amount
+              assign saved = discount.total_allocated_amount | times: 100 | divided_by: cart_subtotal
+              assign savings = saved | append: '%'
+            endif
+            capture savings_html
+              echo savings | append: '</strong>' | prepend: '<strong>'
+            endcapture
+            assign discount_popup_html = true
+            break
+          endif
+        endfor
+      endfor
+    endif
+  endif
+-%}
+{%- if savings_html != blank and discount_popup_html -%}
+  <ul>
+    <li id="cst-discount-popup">
+      <div class="offer-code">
+        <div class="title">
+          <span>{{- discount_message | replace: '[savings]', savings_html | replace: '[image]', '' -}}</span>
+        </div>
+        {{- discount_icon -}}
+      </div>
+    </li>
+  </ul>
+{%- endif -%}
