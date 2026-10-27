@@ -9,8 +9,22 @@
  */
 {
   "current": {
+    "type_primary_font": "work_sans_n4",
+    "type_heading_font": "cormorant_n5",
+    "type_scale_paragraph_size": "sm",
+    "type_scale_heading_size": "md",
+    "border_radius_buttons": "rounded",
+    "border_radius_cards": "rounded",
+    "border_radius_forms": "sharp",
     "free_shipping_threshold": 200,
     "shipping_protection_product": "shipping-protection",
+    "blocks": {
+      "5182184951224911228": {
+        "type": "shopify://apps/rapid-search/blocks/script/bd827795-feaa-41a8-9219-2b83f238aa7d",
+        "disabled": false,
+        "settings": {}
+      }
+    },
     "color_palette": {
       "surface": "#FFF9F3",
       "on_surface": "#262421",
@@ -18,14 +32,7 @@
       "accent": "#8E4F11",
       "interactive": "#4A2B07",
       "color1": "#060606"
-    },
-    "type_primary_font": "work_sans_n4",
-    "type_heading_font": "cormorant_n5",
-    "type_scale_paragraph_size": "sm",
-    "type_scale_heading_size": "md",
-    "border_radius_buttons": "rounded",
-    "border_radius_cards": "rounded",
-    "border_radius_forms": "sharp"
+    }
   },
   "presets": {
     "Terracotta and Cobalt": {

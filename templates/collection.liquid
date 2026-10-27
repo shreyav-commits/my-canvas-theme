@@ -1,3 +1,4 @@
+{% render 'rapid-search-results-template-v2' %}
 {% block 'container' %}
   {%- # theme-check-disable-next-line UnknownFilter %}
   <s-view-event class="block py-12" view-event-trigger="connect" view-event-payload="{{ collection | standard_event_data: 'view' | escape }}">
