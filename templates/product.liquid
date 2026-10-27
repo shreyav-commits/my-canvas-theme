@@ -11,7 +11,7 @@
     <s-product-image-zoom class="block">
         {%- liquid
           # product-grid gives the gallery 2/3 of the width after gutters and the 48px gap.
-          # The first image spans the full gallery; the rest sit two-up below it.
+          # Gallery rhythm 1:2:1:2 on desktop: slots 1, 4, 7... span the full width, the others sit two-up. A trailing item that would sit alone also spans full.
           # Mirror the first-image sizes in snippets/lcp-preload.liquid; mobile stays full bleed.
           assign gallery_sizes_large = '(min-width: 1280px) 768px, (min-width: 768px) calc((100vw - 128px) * 2 / 3), 100vw'
           assign gallery_sizes_small = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 128px) / 3), 100vw'
@@ -40,13 +40,23 @@
                 continue
               endif
               assign gallery_index = gallery_index | plus: 1
-              if gallery_index == 1
+              assign gallery_slot = gallery_index | minus: 1 | modulo: 3
+              assign gallery_full = false
+              if gallery_slot == 0
+                assign gallery_full = true
+              elsif gallery_slot == 1 and gallery_index == product.media.size
+                assign gallery_full = true
+              endif
+              if gallery_full
                 assign gallery_sizes = gallery_sizes_large
               else
                 assign gallery_sizes = gallery_sizes_small
               endif
             -%}
-            <div class="shrink-0 snap-center w-full contain-paint{% if gallery_index == 1 %} md:col-span-2{% endif %}">
+            <div class="relative shrink-0 snap-center w-full contain-paint{% if gallery_full %} md:col-span-2{% endif %}">
+              {%- if gallery_index == 1 -%}
+                {% render 'product-badges', product: product, variant: product.selected_or_first_available_variant, class: 'absolute top-3 start-3 z-10 pointer-events-none md:top-4 md:start-4' %}
+              {%- endif -%}
               {%- if media.media_type == 'image' -%}
                 {%- liquid
                   assign image_label = media.alt | default: media.preview_image.alt | default: product_title
@@ -156,31 +166,38 @@
         if current_variant.compare_at_price > current_variant.price
           assign on_sale = true
           assign sale_savings = current_variant.compare_at_price | minus: current_variant.price
-          assign sale_percent = sale_savings | times: 100 | divided_by: current_variant.compare_at_price
           assign sale_savings_money = sale_savings | money
         endif
         assign pdp_free_shipping_cents = settings.free_shipping_threshold | default: 0 | times: 100
         assign pdp_free_shipping_money = pdp_free_shipping_cents | money_without_trailing_zeros
       -%}
       <div class="pt-4 md:pt-8">
-        <div class="flex flex-wrap items-center gap-3 mb-4">
-          {% if on_sale %}
-            <span class="inline-flex items-center rounded-full bg-sale px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-surface">{{ 'product.sale_badge' | t: percent: sale_percent }}</span>
-          {% endif %}
+        {%- assign crumb_collection = collection | default: product.collections.first -%}
+        <nav aria-label="{{ 'product.breadcrumb_label' | t | escape }}" class="mb-6 hidden md:block">
+          <ol role="list" class="flex flex-wrap items-center gap-2 text-[0.6875rem] uppercase tracking-[0.16em] text-on-surface-secondary">
+            <li><a href="{{ routes.root_url }}" class="hover:text-on-surface motion-safe:transition-colors">{{ 'product.breadcrumb_home' | t }}</a></li>
+            {%- if crumb_collection != blank -%}
+              <li aria-hidden="true" class="text-on-surface/30">/</li>
+              <li><a href="{{ crumb_collection.url }}" class="hover:text-on-surface motion-safe:transition-colors">{{ crumb_collection.title | escape }}</a></li>
+            {%- endif -%}
+          </ol>
+        </nav>
+        <div class="flex flex-wrap items-center gap-3 mb-3">
           {% if product.vendor != blank %}
-            {% block 'text', variant: 'type-body-sm', class: 'text-on-surface-secondary uppercase tracking-[0.18em]' %}<bdi>{{ product.vendor | escape }}</bdi>{% endblock %}
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.6875rem] font-medium text-accent uppercase tracking-[0.2em]' %}<bdi>{{ product.vendor | escape }}</bdi>{% endblock %}
           {% endif %}
         </div>
-        {% block 'text', tag: 'h1', variant: 'type-display', class: 'text-on-surface max-md:text-[2.5rem] max-md:leading-[1.05]' %}{{ product_title | escape }}{% endblock %}
+        {% block 'text', tag: 'h1', variant: 'type-heading-lg', class: 'text-on-surface font-normal text-[1.75rem] leading-[1.15] tracking-[0.01em] md:text-[2.25rem] text-balance' %}{{ product_title | escape }}{% endblock %}
+        <span class="mt-4 block h-px w-10 bg-on-surface/40" aria-hidden="true"></span>
         <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2" data-product-price>
-          {% block 'price', price: current_variant.price, compare_at_price: current_variant.compare_at_price, variant: 'type-heading-md', class: 'font-semibold' %}{% endblock %}
+          {% block 'price', price: current_variant.price, compare_at_price: current_variant.compare_at_price, variant: 'type-heading-sm', class: 'font-normal tracking-[0.02em] text-on-surface' %}{% endblock %}
           {% if on_sale %}
-            <span class="inline-flex items-center rounded-full border border-sale px-3 py-1 text-xs font-semibold uppercase tracking-wide text-sale">{{ 'product.save_amount' | t: amount: sale_savings_money }}</span>
+            <span class="inline-flex items-center border border-sale/60 px-2.5 py-1 text-[0.625rem] font-medium uppercase tracking-[0.16em] text-sale">{{ 'product.save_amount' | t: amount: sale_savings_money }}</span>
           {% endif %}
         </div>
         {% if pdp_free_shipping_cents > 0 %}
-          <p class="mt-4 flex items-center gap-2 text-sm font-medium text-on-surface">
-            <span class="inline-flex size-6 shrink-0" aria-hidden="true">{{- 'icon-truck.svg' | inline_asset_content -}}</span>
+          <p class="mt-4 flex items-center gap-2 text-xs text-on-surface-secondary">
+            <span class="inline-flex size-4 shrink-0" aria-hidden="true">{{- 'icon-truck.svg' | inline_asset_content -}}</span>
             {{ 'product.free_shipping_over' | t: amount: pdp_free_shipping_money }}
           </p>
         {% endif %}
@@ -209,9 +226,9 @@
         {%- assign product_form_error_id = 'product-form-error-' | append: product.id -%}
         {% form 'product', product %}
           {% if product.variants.size > 1 %}
-            <s-variant-picker class="block space-y-4" data-updated-message="{{ 'accessibility.variant_updated' | t }}" data-error-message="{{ 'accessibility.update_error' | t | escape }}" data-product-id="{{ product.id }}" data-product-title="{{ product.title | escape }}" data-product-handle="{{ product.handle }}">
+            <s-variant-picker class="block space-y-4" data-preselected="{% if product.selected_variant %}true{% else %}false{% endif %}" data-updated-message="{{ 'accessibility.variant_updated' | t }}" data-error-message="{{ 'accessibility.update_error' | t | escape }}" data-product-id="{{ product.id }}" data-product-title="{{ product.title | escape }}" data-product-handle="{{ product.handle }}">
               {%- for option in product.options_with_values -%}
-                {%- block 'variant-picker', product: product, option: option, show_selected_value: true -%}{%- endblock -%}
+                {%- block 'variant-picker', product: product, option: option, option_type: 'dropdown', show_selected_value: false -%}{%- endblock -%}
               {%- endfor -%}
               {%- comment -%} Variant refresh feedback stays separate from the add-to-cart error owned by s-product-form. {%- endcomment -%}
               <p data-variant-picker-error hidden class="text-sm text-sale">{{ 'accessibility.update_error' | t }}</p>
@@ -222,7 +239,7 @@
 
           <div class="flex items-center gap-4 mb-10">
             <div class="shrink-0">
-              <label for="product-quantity" class="text-sm font-medium text-on-surface mb-2 block">{{ 'product.quantity' | t }}</label>
+              <label for="product-quantity" class="mb-2 block text-[0.6875rem] uppercase tracking-[0.16em] text-on-surface-secondary">{{ 'product.quantity' | t }}</label>
               {%- liquid
                 assign qty_min = current_variant.quantity_rule.min | default: 1
                 assign qty_max = current_variant.quantity_rule.max
@@ -236,23 +253,44 @@
             {%- comment -%} Stock urgency: low tracked stock pulses a "selling fast" note; otherwise a calm in-stock signal. Lives in the product-form partial so it follows the selected variant. {%- endcomment -%}
             {%- liquid
               assign low_stock = false
+              assign is_preorder = false
+              for tag in product.tags
+                assign tag_key = tag | downcase | remove: ' ' | remove: '-' | remove: '_'
+                if tag_key == 'preorder'
+                  assign is_preorder = true
+                endif
+              endfor
+              if current_variant.inventory_management != blank and current_variant.inventory_quantity <= 0 and current_variant.inventory_policy == 'continue'
+                assign is_preorder = true
+              endif
               if current_variant.inventory_management != blank and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= 10
                 assign low_stock = true
               endif
             -%}
-            <p class="-mt-4 mb-4 flex items-center gap-2 text-sm font-semibold {% if low_stock %}text-sale{% else %}text-on-surface{% endif %}">
-              <span class="relative inline-flex size-2.5" aria-hidden="true">
-                <span class="absolute inset-0 rounded-full {% if low_stock %}bg-sale{% else %}bg-success{% endif %} motion-safe:animate-ping opacity-60"></span>
-                <span class="relative inline-flex size-2.5 rounded-full {% if low_stock %}bg-sale{% else %}bg-success{% endif %}"></span>
+            <p class="-mt-4 mb-5 flex items-center gap-2.5 text-[0.6875rem] uppercase tracking-[0.16em] {% if low_stock %}text-sale{% else %}text-on-surface-secondary{% endif %}">
+              <span class="relative inline-flex size-1.5" aria-hidden="true">
+                <span class="relative inline-flex size-1.5 rounded-full {% if low_stock %}bg-sale{% else %}bg-success{% endif %}"></span>
               </span>
-              {%- if low_stock -%}
+              {%- if is_preorder -%}
+                {{ 'product.preorder_note' | t }}
+              {%- elsif low_stock -%}
                 {{ 'product.only_left' | t: count: current_variant.inventory_quantity }}
               {%- else -%}
                 {{ 'product.in_stock' | t }}
               {%- endif -%}
             </p>
-            {%- capture add_button_attrs -%}aria-describedby="{{ product_form_error_id }}"{%- endcapture -%}
-            {% block 'button', type: 'submit', name: 'add', variant: 'button-primary', class: 'h-14 px-6 text-sm font-bold uppercase tracking-[0.16em] rounded-button w-full shadow-lg motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98]', attributes: add_button_attrs %}{{- 'product.add_to_cart' | t -}}{% endblock %}
+            {%- liquid
+              # Options start unselected: until the shopper picks every option (or opens a ?variant= link) the button stays disabled. s-variant-picker.js lifts the gate.
+              assign options_pending = false
+              if product.has_only_default_variant == false and product.selected_variant == blank
+                assign options_pending = true
+              endif
+            -%}
+            {%- capture add_button_attrs -%}aria-describedby="{{ product_form_error_id }}" data-add-button{% if options_pending %} disabled aria-disabled="true"{% endif %}{%- endcapture -%}
+            {% block 'button', type: 'submit', name: 'add', variant: 'button-primary', class: 'h-14 px-6 text-xs font-medium uppercase tracking-[0.22em] rounded-button w-full motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed', attributes: add_button_attrs %}
+              <span data-add-label-ready{% if options_pending %} hidden{% endif %}>{%- if is_preorder -%}{{- 'product.preorder_button' | t -}}{%- else -%}{{- 'product.add_to_cart' | t -}}{%- endif -%}</span>
+              <span data-add-label-pending{% unless options_pending %} hidden{% endunless %}>{{- 'product.select_options_button' | t -}}</span>
+            {% endblock %}
           {%- else -%}
             {%- comment -%}
               type="button" prevents keyboard form submission when sold out; aria-disabled is set by the block.
@@ -263,93 +301,175 @@
 
           <p id="{{ product_form_error_id }}" data-add-to-cart-error role="alert" hidden class="mt-3 text-sm text-sale"></p>
 
-          <div class="mt-3 [--shopify-accelerated-checkout-button-block-size:var(--spacing-touch-target)] [--shopify-accelerated-checkout-button-border-radius:var(--radius-button)] [--shopify-accelerated-checkout-button-box-shadow:none] [--shopify-accelerated-checkout-skeleton-background-color:var(--color-surface-secondary)]">
+          <div data-payment-buttons{% if options_pending %} hidden{% endif %} class="mt-3 [--shopify-accelerated-checkout-button-block-size:var(--spacing-touch-target)] [--shopify-accelerated-checkout-button-border-radius:var(--radius-button)] [--shopify-accelerated-checkout-button-box-shadow:none] [--shopify-accelerated-checkout-skeleton-background-color:var(--color-surface-secondary)]">
             {{ form | payment_button }}
           </div>
         {% endform %}
 
         {%- comment -%} Trust row: each label is its own editable text block. {%- endcomment -%}
-        <ul role="list" class="mt-6 grid grid-cols-3 gap-2 border-y border-on-surface/15 py-4 text-center">
-          <li class="flex flex-col items-center gap-2">
-            <span class="inline-flex size-7 text-on-surface" aria-hidden="true">{{- 'icon-lock.svg' | inline_asset_content -}}</span>
-            {% block 'text', variant: 'type-body-sm', class: 'text-xs font-semibold uppercase tracking-wide text-on-surface' %}{{- 'product.trust_secure' | t -}}{% endblock %}
+        <ul role="list" class="mt-8 grid grid-cols-3 divide-x divide-on-surface/15 border-y border-on-surface/15 py-5 text-center">
+          <li class="flex flex-col items-center gap-2.5 px-2">
+            <span class="inline-flex size-5 text-on-surface/70" aria-hidden="true">{{- 'icon-lock.svg' | inline_asset_content -}}</span>
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.625rem] font-medium uppercase tracking-[0.16em] text-on-surface-secondary' %}{{- 'product.trust_secure' | t -}}{% endblock %}
           </li>
-          <li class="flex flex-col items-center gap-2">
-            <span class="inline-flex size-7 text-on-surface" aria-hidden="true">{{- 'icon-return.svg' | inline_asset_content -}}</span>
-            {% block 'text', variant: 'type-body-sm', class: 'text-xs font-semibold uppercase tracking-wide text-on-surface' %}{{- 'product.trust_returns' | t -}}{% endblock %}
+          <li class="flex flex-col items-center gap-2.5 px-2">
+            <span class="inline-flex size-5 text-on-surface/70" aria-hidden="true">{{- 'icon-return.svg' | inline_asset_content -}}</span>
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.625rem] font-medium uppercase tracking-[0.16em] text-on-surface-secondary' %}{{- 'product.trust_returns' | t -}}{% endblock %}
           </li>
-          <li class="flex flex-col items-center gap-2">
-            <span class="inline-flex size-7 text-on-surface" aria-hidden="true">{{- 'icon-truck.svg' | inline_asset_content -}}</span>
-            {% block 'text', variant: 'type-body-sm', class: 'text-xs font-semibold uppercase tracking-wide text-on-surface' %}{{- 'product.trust_delivery' | t -}}{% endblock %}
+          <li class="flex flex-col items-center gap-2.5 px-2">
+            <span class="inline-flex size-5 text-on-surface/70" aria-hidden="true">{{- 'icon-truck.svg' | inline_asset_content -}}</span>
+            {% block 'text', variant: 'type-body-sm', class: 'text-[0.625rem] font-medium uppercase tracking-[0.16em] text-on-surface-secondary' %}{{- 'product.trust_delivery' | t -}}{% endblock %}
           </li>
         </ul>
 
         {% endpartial %}
       </s-product-form>
 
+      {%- comment -%}
+        Frequently bought together: this product + up to 2 companions. Companions come from the
+        custom.completelook metafield first, then fill from the product's first collection.
+        s-fbt.js keeps the total live and adds every checked item in one go.
+      {%- endcomment -%}
+      {%- liquid
+        assign fbt_limit = 2
+        assign fbt_handles = '|'
+        assign fbt_count = 0
+        for fbt_candidate in product.metafields.custom.completelook.value
+          if fbt_count >= fbt_limit
+            break
+          endif
+          assign fbt_key = '|' | append: fbt_candidate.handle | append: '|'
+          if fbt_handles contains fbt_key
+            continue
+          endif
+          if fbt_candidate.id != product.id and fbt_candidate.available
+            assign fbt_handles = fbt_handles | append: fbt_candidate.handle | append: '|'
+            assign fbt_count = fbt_count | plus: 1
+          endif
+        endfor
+        if fbt_count < fbt_limit
+          assign fbt_collection = collection
+          if fbt_collection == blank
+            for fbt_col in product.collections
+              if fbt_col.handle == 'all' or fbt_col.handle contains 'globofilter' or fbt_col.handle contains 'cloud-search' or fbt_col.products_count > 1000
+                continue
+              endif
+              assign fbt_collection = fbt_col
+              break
+            endfor
+          endif
+          for fbt_candidate in fbt_collection.products limit: 12
+            if fbt_count >= fbt_limit
+              break
+            endif
+            assign fbt_key = '|' | append: fbt_candidate.handle | append: '|'
+            if fbt_handles contains fbt_key
+              continue
+            endif
+            if fbt_candidate.id != product.id and fbt_candidate.available
+              assign fbt_handles = fbt_handles | append: fbt_candidate.handle | append: '|'
+              assign fbt_count = fbt_count | plus: 1
+            endif
+          endfor
+        endif
+        assign fbt_handle_list = fbt_handles | remove_first: '|' | split: '|'
+      -%}
+      {%- if fbt_count > 0 and current_variant.available -%}
+        {%- capture fbt_main_prices -%}{ {%- for v in product.variants -%}"{{ v.id }}":{{ v.price }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }{%- endcapture -%}
+        <s-fbt
+          class="block border border-on-surface/15 p-5 md:p-6"
+          data-product-id="{{ product.id }}"
+          data-cart-add-url="{{ routes.cart_add_url }}"
+          data-money-sample="{{ 123456 | money | strip_html | escape }}"
+          data-main-prices="{{ fbt_main_prices | escape }}"
+          data-select-message="{{ 'product.fbt_select_options' | t | escape }}"
+          data-error-message="{{ 'cart.update_error' | t | escape }}"
+        >
+          {% block 'text', tag: 'h2', variant: 'type-body-sm', class: 'text-xs font-medium uppercase tracking-[0.18em] text-on-surface' %}{{- 'product.fbt_heading' | t -}}{% endblock %}
+
+          <div class="mt-5 flex items-center gap-2" aria-hidden="true">
+            <div data-fbt-image="0" class="w-16 shrink-0 overflow-hidden bg-surface-secondary motion-safe:transition-opacity">
+              {% block 'image', fallback_image: product.featured_image, placeholder_kind: 'product', aspect_ratio: 'aspect-[3/4]', sizes: '64px', attributes: 'loading="lazy"', alt: '' %}{% endblock %}
+            </div>
+            {%- for fbt_handle in fbt_handle_list -%}
+              {%- assign fbt_product = all_products[fbt_handle] -%}
+              <span class="text-on-surface/40">+</span>
+              <a href="{{ fbt_product.url }}" tabindex="-1" data-fbt-image="{{ forloop.index }}" class="block w-16 shrink-0 overflow-hidden bg-surface-secondary motion-safe:transition-opacity">
+                {% block 'image', fallback_image: fbt_product.featured_image, placeholder_kind: 'product', aspect_ratio: 'aspect-[3/4]', sizes: '64px', attributes: 'loading="lazy"', alt: '' %}{% endblock %}
+              </a>
+            {%- endfor -%}
+          </div>
+
+          <ul role="list" class="mt-5 flex flex-col gap-3">
+            <li>
+              <label class="flex cursor-pointer items-start gap-3 text-sm">
+                <input type="checkbox" checked data-fbt-item data-fbt-main data-variant-id="{{ current_variant.id }}" data-price="{{ current_variant.price }}" class="mt-0.5 size-4 shrink-0 accent-[var(--color-on-surface)]">
+                <span class="min-w-0 flex-1 text-on-surface"><span class="text-on-surface-secondary">{{ 'product.fbt_this_item' | t }}</span> {{ product_title | escape }}</span>
+                <span class="shrink-0 text-on-surface" data-fbt-main-price>{{ current_variant.price | money }}</span>
+              </label>
+            </li>
+            {%- for fbt_handle in fbt_handle_list -%}
+              {%- assign fbt_product = all_products[fbt_handle] -%}
+              {%- assign fbt_variant = fbt_product.selected_or_first_available_variant -%}
+              <li>
+                <label class="flex cursor-pointer items-start gap-3 text-sm">
+                  <input type="checkbox" checked data-fbt-item data-variant-id="{{ fbt_variant.id }}" data-price="{{ fbt_variant.price }}" class="mt-0.5 size-4 shrink-0 accent-[var(--color-on-surface)]">
+                  <span class="min-w-0 flex-1 text-on-surface">
+                    {{ fbt_product.title | escape }}
+                    {%- unless fbt_product.has_only_default_variant %}<span class="block text-xs text-on-surface-secondary">{{ fbt_variant.title | escape }}</span>{% endunless -%}
+                  </span>
+                  <span class="shrink-0 text-on-surface">{{ fbt_variant.price | money }}</span>
+                </label>
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          <div class="mt-5 flex flex-col gap-4 border-t border-on-surface/15 pt-5">
+            <p class="flex items-baseline justify-between gap-4 text-sm">
+              <span class="text-[0.6875rem] uppercase tracking-[0.16em] text-on-surface-secondary">{{ 'product.fbt_total' | t }}</span>
+              <span class="text-base text-on-surface" data-fbt-total>{{ current_variant.price | money }}</span>
+            </p>
+            <button type="button" data-fbt-add class="button-secondary inline-flex h-12 w-full items-center justify-center gap-2 border border-on-surface rounded-button px-5 text-xs font-medium uppercase tracking-[0.22em] motion-safe:transition-colors disabled:opacity-40 disabled:cursor-not-allowed aria-busy:opacity-60">
+              {{ 'product.fbt_add' | t }} (<span data-fbt-count>{{ fbt_count | plus: 1 }}</span>)
+            </button>
+            <p data-fbt-error role="alert" hidden class="text-xs text-sale"></p>
+          </div>
+        </s-fbt>
+        <script type="module" src="{{ 's-fbt.js' | asset_url }}"></script>
+      {%- endif -%}
+
       {%- comment -%} Product Description {%- endcomment -%}
       {%- comment -%} Unconditional sr-only h2 ensures heading hierarchy is valid even when no description exists, preserving the semantic outline across all product pages {%- endcomment -%}
       <h2 class="sr-only">{{ 'product.details' | t }}</h2>
 
-      {% if product.description != blank %}
-        <div class="border-t border-border pt-4">
-          {%- assign description_label = 'product.description' | t -%}
-          <h3 class="text-sm font-medium mb-4">{{ description_label | escape }}</h3>
-          {%- comment -%} The schema-backed setting keeps the product description connected as rich text instead of flattening its internal treatments through the text block. {%- endcomment -%}
-          {% block 'richtext', text: product.description, class: 'text-sm' %}{% endblock %}
-        </div>
-      {% endif %}
-
-      {%- comment -%} Upsell: a compact, add-in-place list of recommended works beneath the description. Each row reuses s-product-form so adding stays on-page and opens the cart drawer. {%- endcomment -%}
-      {%- liquid
-        # Pairs well with: products the merchant picks in the custom.completelook metafield (CompleteLook). Hidden when the product has none.
-        assign upsell_limit = 6
-        assign complete_look = product.metafields.custom.completelook.value
-      -%}
-      {%- if complete_look.size > 0 -%}
-      {% capture upsell_list %}
-        <ul role="list" class="flex flex-col divide-y divide-on-surface/15 border-y border-on-surface/15">
-          {% for rec_product in complete_look limit: upsell_limit %}
-            {%- assign rec_variant = rec_product.selected_or_first_available_variant -%}
-            {%- assign upsell_add_label = 'product.upsell_add_label' | t: title: rec_product.title -%}
-            <li>
-              {%- # theme-check-disable-next-line UnknownFilter %}
-              <s-view-event class="block" view-event-trigger="intersect" view-event-payload="{{ rec_product | standard_event_data: 'view' | escape }}">
-                {% block 'card', block.name: 't:blocks.product_card', url: rec_product.url, aria_label: rec_product.title, border_radius: 'rounded-card', class: 'grid grid-cols-[4.5rem_1fr_auto] items-center gap-4 py-4' %}
-                  <a href="{{ rec_product.url | escape }}" class="block size-18 overflow-hidden bg-surface-secondary" tabindex="-1" aria-hidden="true">
-                    {% block 'image', fallback_image: rec_product.featured_image, placeholder_kind: 'product', aspect_ratio: 'aspect-square', sizes: '72px', widths: '72,144,216', alt: rec_product.title, attributes: 'loading="lazy"', seed: forloop.index %}{% endblock %}
-                  </a>
-                  <div class="min-w-0 flex flex-col gap-1">
-                    <a href="{{ rec_product.url | escape }}" class="no-underline text-on-surface hover:opacity-70 motion-safe:transition-opacity">
-                      {% block 'text', variant: 'type-body', tag: 'h3', class: 'line-clamp-2' %}{{ rec_product.title | escape }}{% endblock %}
-                    </a>
-                    {% block 'price', price: rec_variant.price, compare_at_price: rec_variant.compare_at_price, class: 'text-sm text-on-surface-secondary self-start' %}{% endblock %}
-                  </div>
-                  <s-product-form class="block" data-product-form data-product-id="{{ rec_product.id }}" data-cart-add-url="{{ routes.cart_add_url }}" data-error-message="{{ 'cart.update_error' | t | escape }}">
-                    {%- assign upsell_form_id = 'upsell-form-' | append: rec_product.id -%}
-                    {% form 'product', rec_product, id: upsell_form_id %}
-                      <input type="hidden" name="id" value="{{ rec_variant.id }}">
-                      <input type="hidden" name="quantity" value="1">
-                      {%- if rec_variant.available -%}
-                        {%- capture upsell_button_attrs -%}aria-label="{{ upsell_add_label | escape }}"{%- endcapture -%}
-                        {% block 'button', type: 'submit', name: 'add', variant: 'button-outline', class: 'rounded-button h-10 px-5 text-xs uppercase tracking-[0.14em] border', attributes: upsell_button_attrs %}{{- 'product.upsell_add' | t -}}{% endblock %}
-                      {%- else -%}
-                        {% block 'button', type: 'button', inert: true, variant: 'button-outline', class: 'rounded-button h-10 px-5 text-xs uppercase tracking-[0.14em] border', disabled: true %}{{- 'product.sold_out' | t -}}{% endblock %}
-                      {%- endif -%}
-                      <p data-add-to-cart-error role="alert" hidden class="mt-2 text-xs text-sale"></p>
-                    {% endform %}
-                  </s-product-form>
-                {% endblock %}
-              </s-view-event>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endcapture %}
-      <div class="mt-10">
-        {% block 'text', tag: 'h2', variant: 'type-heading-sm', class: 'mb-4' %}{{- 'product.upsell_heading' | t -}}{% endblock %}
-        {{ upsell_list }}
+      {%- comment -%} Details accordion: description opens by default; shipping and care notes are shared copy in locales. {%- endcomment -%}
+      {%- capture acc_icon -%}<span class="relative inline-flex size-3 shrink-0" aria-hidden="true"><span class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-current"></span><span class="absolute inset-y-0 start-1/2 w-px -translate-x-1/2 bg-current motion-safe:transition-transform group-open:scale-y-0"></span></span>{%- endcapture -%}
+      <div class="divide-y divide-on-surface/15 border-y border-on-surface/15">
+        {% if product.description != blank %}
+          <details class="group" open>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-medium uppercase tracking-[0.18em] text-on-surface [&::-webkit-details-marker]:hidden">
+              <h3 class="m-0 font-body text-xs font-medium uppercase tracking-[0.18em]">{{ 'product.description' | t }}</h3>{{ acc_icon }}
+            </summary>
+            <div class="pb-6">
+              {%- comment -%} The schema-backed setting keeps the product description connected as rich text instead of flattening its internal treatments through the text block. {%- endcomment -%}
+              {% block 'richtext', text: product.description, class: 'text-sm leading-relaxed text-on-surface-secondary' %}{% endblock %}
+            </div>
+          </details>
+        {% endif %}
+        <details class="group">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-medium uppercase tracking-[0.18em] text-on-surface [&::-webkit-details-marker]:hidden">
+            <h3 class="m-0 font-body text-xs font-medium uppercase tracking-[0.18em]">{{ 'product.shipping_heading' | t }}</h3>{{ acc_icon }}
+          </summary>
+          {% block 'text', variant: 'type-body-sm', class: 'pb-6 text-sm leading-relaxed text-on-surface-secondary' %}{{ 'product.shipping_body' | t }}{% endblock %}
+        </details>
+        <details class="group">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-xs font-medium uppercase tracking-[0.18em] text-on-surface [&::-webkit-details-marker]:hidden">
+            <h3 class="m-0 font-body text-xs font-medium uppercase tracking-[0.18em]">{{ 'product.care_heading' | t }}</h3>{{ acc_icon }}
+          </summary>
+          {% block 'text', variant: 'type-body-sm', class: 'pb-6 text-sm leading-relaxed text-on-surface-secondary' %}{{ 'product.care_body' | t }}{% endblock %}
+        </details>
       </div>
-      {%- endif -%}
+
     </div>
   </div>
   </s-view-event>

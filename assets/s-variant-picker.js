@@ -11,7 +11,11 @@
  *   input[name="id"]            — Hidden product-form input kept in sync for add-to-cart.
  *   input[name="quantity"]      — Quantity input preserved across product-form swaps.
  *
+ * Selection gate: selects with [data-option-select] start on a "Select …" placeholder; add to cart
+ *   ([data-add-button]) and [data-payment-buttons] stay disabled/hidden until every option is chosen.
+ *
  * Element dataset (on <s-variant-picker>):
+ *   data-preselected       — "true" when the page loaded with ?variant=, so every option counts as chosen.
  *   data-updated-message   — i18n string announced via #sr-announcer after the variant updates.
  *   data-error-message     — i18n string shown locally and announced after a current update fails.
  *
@@ -61,12 +65,60 @@ class VariantPicker extends HTMLElement {
 
     this.addEventListener('change', (e) => {
       const input = e.target;
+      if (input instanceof HTMLSelectElement && input.hasAttribute('data-option-select')) {
+        this.#chosenOptions().add(input.name);
+        this.#applySelectionGate();
+      }
       const variantId = input.dataset.variantId
         || input.selectedOptions?.[0]?.dataset?.variantId;
       if (variantId) {
         this.#update(variantId);
       }
     }, opts);
+
+    this.#applySelectionGate();
+  }
+
+  /**
+   * Options the shopper has explicitly chosen. Stored on the stable product-form host so it
+   * survives the product-form partial swap that replaces this element. A ?variant= deep link
+   * (data-preselected="true" on first render) counts as every option chosen.
+   */
+  #chosenOptions() {
+    const host = this.closest('[data-product-form]') || this;
+    if (!host.__chosenOptions) {
+      host.__chosenOptions = new Set();
+      if (this.dataset.preselected === 'true') {
+        this.querySelectorAll('select[data-option-select]').forEach((select) => host.__chosenOptions.add(select.name));
+      }
+    }
+    return host.__chosenOptions;
+  }
+
+  /**
+   * Keeps unchosen dropdowns on their "Select …" placeholder and holds add to cart and
+   * accelerated checkout until every option has a value.
+   */
+  #applySelectionGate() {
+    const selects = Array.from(this.querySelectorAll('select[data-option-select]'));
+    if (selects.length === 0) return;
+    const chosen = this.#chosenOptions();
+    selects.forEach((select) => {
+      if (!chosen.has(select.name)) select.value = '';
+    });
+    const complete = selects.every((select) => chosen.has(select.name));
+
+    const host = this.closest('[data-product-form]') || this.parentElement;
+    const button = host?.querySelector('[data-add-button]');
+    if (button) {
+      button.disabled = !complete;
+      button.toggleAttribute('aria-disabled', !complete);
+      if (!complete) button.setAttribute('aria-disabled', 'true');
+      button.querySelector('[data-add-label-ready]')?.toggleAttribute('hidden', !complete);
+      button.querySelector('[data-add-label-pending]')?.toggleAttribute('hidden', complete);
+    }
+    const payment = host?.querySelector('[data-payment-buttons]');
+    if (payment) payment.hidden = !complete;
   }
 
   disconnectedCallback() {
@@ -207,6 +259,7 @@ class VariantPicker extends HTMLElement {
 
     this.#syncSelectedVariantId(this.#committedVariantId, productForm);
     history.replaceState(this.#committedHistoryState, '', this.#committedUrl);
+    this.#applySelectionGate();
   }
 
   #commitState(variantId, url) {
