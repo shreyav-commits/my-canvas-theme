@@ -145,14 +145,19 @@
       </div>
 
     {%- elsif option_type == 'dropdown' -%}
+      {%- comment -%} No value is preselected until the shopper picks one (or arrives on a ?variant= link); s-variant-picker keeps unchosen selects on the placeholder. {%- endcomment -%}
+      {%- assign selection_pending = false -%}
+      {%- if product.selected_variant == blank -%}{%- assign selection_pending = true -%}{%- endif -%}
       <select
         name="{{ option.name | escape }}"
         id="{{ form_id | escape }}-option-{{ option.position }}-{{ option.name | handleize }}"
-        class="cursor-pointer hover:border-interactive {{ radius }}"
+        class="cursor-pointer h-12 hover:border-interactive {{ radius }}"
+        data-option-select
         aria-label="{{ option.name | escape }}">
+        <option value="" disabled{% if selection_pending %} selected{% endif %}>{{ 'product.select_option' | t: name: option.name }}</option>
         {%- for value in option.values -%}
-          <option value="{{ value | escape }}" data-variant-id="{{ value.variant.id }}"{% if value.selected %} selected{% endif %}>
-            {{- value | escape -}}
+          <option value="{{ value | escape }}" data-variant-id="{{ value.variant.id }}"{% if value.selected and selection_pending == false %} selected{% endif %}{% if value.variant.available == false %} data-unavailable{% endif %}>
+            {{- value | escape -}}{% if value.variant.available == false %} {{ 'product.option_sold_out' | t }}{% endif %}
           </option>
         {%- endfor -%}
       </select>

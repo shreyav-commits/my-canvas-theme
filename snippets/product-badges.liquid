@@ -1,0 +1,68 @@
+{% doc %}
+  Sale, Best seller, and Pre-order badges for a product.
+
+  - Sale: the variant (or product) has a compare-at price above its price; shows the percent off.
+  - Best seller: the product has a tag like "Best Seller", "best-seller" or "bestseller".
+  - Pre-order: the product has a tag like "Pre-order" or "preorder", or the variant is tracked,
+    out of stock, and set to continue selling when out of stock.
+
+  Renders nothing when no badge applies.
+
+  @param {object} product - Product to badge. @required
+  @param {object} [variant] - Variant to read price and stock from. Default: product.selected_or_first_available_variant.
+  @param {string} [class] - Additional classes on the list (positioning, gap).
+  @param {string} [size] - 'sm' for cards, 'md' for the product page. Default: 'md'.
+{% enddoc %}
+
+{%- liquid
+  assign badge_variant = variant | default: product.selected_or_first_available_variant
+  assign badge_size = size | default: 'md'
+
+  assign badge_sale = false
+  assign badge_percent = 0
+  if badge_variant.compare_at_price > badge_variant.price
+    assign badge_sale = true
+    assign badge_savings = badge_variant.compare_at_price | minus: badge_variant.price
+    assign badge_percent = badge_savings | times: 100 | divided_by: badge_variant.compare_at_price
+  elsif variant == blank and product.compare_at_price > product.price
+    assign badge_sale = true
+    assign badge_savings = product.compare_at_price | minus: product.price
+    assign badge_percent = badge_savings | times: 100 | divided_by: product.compare_at_price
+  endif
+
+  assign badge_best = false
+  assign badge_preorder = false
+  for tag in product.tags
+    assign tag_key = tag | downcase | remove: ' ' | remove: '-' | remove: '_'
+    if tag_key == 'bestseller'
+      assign badge_best = true
+    elsif tag_key == 'preorder'
+      assign badge_preorder = true
+    endif
+  endfor
+  if badge_variant.available and badge_variant.inventory_management != blank and badge_variant.inventory_quantity <= 0 and badge_variant.inventory_policy == 'continue'
+    assign badge_preorder = true
+  endif
+
+  if badge_size == 'sm'
+    assign badge_class = 'inline-flex items-center px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.14em] leading-none'
+  else
+    assign badge_class = 'inline-flex items-center px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] leading-none'
+  endif
+-%}
+
+{%- if badge_sale or badge_best or badge_preorder -%}
+  <ul role="list" class="flex flex-wrap items-start gap-1.5{{ class | prepend: ' ' }}">
+    {%- if badge_sale -%}
+      <li class="{{ badge_class }} bg-sale text-surface">
+        {%- if badge_percent > 0 -%}{{ 'product.badge_sale_percent' | t: percent: badge_percent }}{%- else -%}{{ 'product.badge_sale' | t }}{%- endif -%}
+      </li>
+    {%- endif -%}
+    {%- if badge_best -%}
+      <li class="{{ badge_class }} bg-accent text-surface">{{ 'product.badge_best_seller' | t }}</li>
+    {%- endif -%}
+    {%- if badge_preorder -%}
+      <li class="{{ badge_class }} bg-interactive text-interactive-text">{{ 'product.badge_preorder' | t }}</li>
+    {%- endif -%}
+  </ul>
+{%- endif -%}

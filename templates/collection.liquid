@@ -94,6 +94,7 @@
               {% block 'card', block.name: 't:blocks.product_card', url: product.url, aria_label: product.title, border_radius: 'rounded-card', class: 'group-data-[view=list]/view:flex-row group-data-[view=list]/view:items-center group-data-[view=list]/view:gap-6 md:group-data-[view=list]/view:gap-10' %}
                 <a href="{{ product.url | escape }}" class="relative block overflow-hidden rounded-[inherit] group-data-[view=list]/view:w-28 md:group-data-[view=list]/view:w-48 group-data-[view=list]/view:shrink-0" aria-label="{{ product.title | escape }}">
                   {% block 'image', fallback_image: product.featured_image, placeholder_kind: 'product', aspect_ratio: 'aspect-square', sizes: product_sizes, attributes: card_image_attributes, alt: product.title, seed: forloop.index %}{% endblock %}
+                  {% render 'product-badges', product: product, size: 'sm', class: 'absolute top-2 start-2 z-10 pointer-events-none' %}
                 </a>
                 <div class="flex flex-col gap-0.5 min-w-0 group-data-[view=list]/view:flex-1 group-data-[view=list]/view:gap-2">
                   {% block 'text', variant: 'type-body-sm', tag: 'h3', class: 'font-medium text-on-surface line-clamp-2' %}{{ product.title | escape }}{% endblock %}
